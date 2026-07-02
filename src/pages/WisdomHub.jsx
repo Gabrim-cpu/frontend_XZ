@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, Home, MessageCircle, BookOpen, Users, Settings as SettingsIcon, LogOut, Search, Bell, HelpCircle, Plus, Diamond, Send, Mic, Paperclip, Smile, Phone, Video, MoreVertical, Square, Play, Check, UserPlus, Clock, Sparkles } from 'lucide-react';
+import { Menu, X, Home, MessageCircle, BookOpen, Users, Settings as SettingsIcon, LogOut, Search, Bell, HelpCircle, Plus, Diamond, Send, Mic, Paperclip, Smile, Phone, Video, MoreVertical, Square, Play, Check, UserPlus, Clock, Sparkles, Library, User, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { getThreads, getMessages, sendMessage, uploadChatMedia, getRecommendations, getAllUsers, requestConnection, getPendingRequests, acceptConnection, rejectConnection, getAcceptedConnections, getFeed, createPost, getStories, getLibrary } from '../services/apiService';
@@ -48,6 +48,7 @@ export default function WisdomHub() {
   };
 
   const appUser = auth?.appUser || {};
+  const isNewUser = auth?.isNewUser || false;
   const userName = appUser?.displayName || appUser?.display_name || 'User';
   const userEmail = appUser?.email || '';
   const userPoints = appUser?.root_points ?? 0;
@@ -477,7 +478,7 @@ function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall
                   >
                     <Phone className="w-4 h-4" />
                   </button>
-                  <HintTooltip show={voiceCallHint.showHint} text="☎️ Voice call" position="below" />
+                  <HintTooltip show={voiceCallHint.showHint} text="Voice call" position="below" />
                 </div>
 
                 <div className="relative">
@@ -491,7 +492,7 @@ function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall
                   >
                     <Video className="w-4 h-4" />
                   </button>
-                  <HintTooltip show={videoCallHint.showHint} text="📹 Video call" position="below" />
+                  <HintTooltip show={videoCallHint.showHint} text="Video call" position="below" />
                 </div>
 
                 <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-500"><MoreVertical className="w-4 h-4" /></button>
@@ -724,7 +725,7 @@ function HomeContent({ userName, userAvatar, currentUser }) {
           {userAvatar ? <img src={userAvatar} alt={userName} className="w-full h-full object-cover" /> : firstName[0]?.toUpperCase()}
         </div>
         <div className="space-y-0.5">
-          <h1 className="text-3xl font-serif font-bold text-gray-900">Welcome back, {firstName}</h1>
+          <h1 className="text-3xl font-serif font-bold text-gray-900">{isNewUser ? 'Welcome' : 'Welcome back'}, {firstName}</h1>
           <p className="text-gray-400 italic font-serif text-sm">"Wisdom is the reward you get for a lifetime of listening."</p>
         </div>
       </div>
@@ -874,23 +875,23 @@ function ArchiveContent({ onCreateStory, onCreateArticle }) {
         <div className="flex gap-2">
           <button
             onClick={() => {setActiveTab('stories'); setSearchTerm('');}}
-            className={`px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] ${
+            className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] ${
               activeTab === 'stories'
                 ? 'bg-brand-burgundy text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            📖 Stories
+            <BookOpen className="w-4 h-4" strokeWidth={1.75} /> Stories
           </button>
           <button
             onClick={() => {setActiveTab('library'); setSearchTerm('');}}
-            className={`px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] ${
+            className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] ${
               activeTab === 'library'
                 ? 'bg-brand-burgundy text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            📚 Library
+            <Library className="w-4 h-4" strokeWidth={1.75} /> Library
           </button>
         </div>
 
@@ -944,8 +945,10 @@ function ArchiveContent({ onCreateStory, onCreateArticle }) {
               className="text-left group bg-white rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-md border border-gray-100 transition-all min-h-[280px] md:min-h-[320px] flex flex-col"
             >
               {/* Icon/Avatar */}
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#FBF1F0] flex items-center justify-center text-2xl mb-4 flex-shrink-0">
-                {activeTab === 'stories' ? '📖' : '📚'}
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#FBF1F0] flex items-center justify-center text-brand-burgundy mb-4 flex-shrink-0">
+                {activeTab === 'stories'
+                  ? <BookOpen className="w-6 h-6" strokeWidth={1.75} />
+                  : <Library className="w-6 h-6" strokeWidth={1.75} />}
               </div>
 
               {/* Title */}
@@ -1105,23 +1108,23 @@ function SettingsContent({ userName, userEmail, appUser, onLogout, language, cha
         <div className="flex gap-2">
           <button
             onClick={() => setSettingsTab('profile')}
-            className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all min-h-[44px] ${
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all min-h-[44px] ${
               settingsTab === 'profile'
                 ? 'bg-brand-burgundy text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            👤 Profile
+            <User className="w-4 h-4" strokeWidth={1.75} /> Profile
           </button>
           <button
             onClick={() => setSettingsTab('moderation')}
-            className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all min-h-[44px] ${
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all min-h-[44px] ${
               settingsTab === 'moderation'
                 ? 'bg-brand-burgundy text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            🛡️ Moderation
+            <Shield className="w-4 h-4" strokeWidth={1.75} /> Moderation
           </button>
         </div>
       </div>
@@ -1503,7 +1506,7 @@ function MentorshipContent({ currentUser, onOpenChat, onStartCall }) {
                       >
                         <Video className="w-4 h-4" />
                       </button>
-                      <HintTooltip show={myCircleVideoHint.showHint} text="📹 Start video" position="below" />
+                      <HintTooltip show={myCircleVideoHint.showHint} text="Start video" position="below" />
                     </div>
 
                     <div className="relative">
@@ -1522,7 +1525,7 @@ function MentorshipContent({ currentUser, onOpenChat, onStartCall }) {
                       >
                         <MessageCircle className="w-4 h-4" />
                       </button>
-                      <HintTooltip show={myCircleMessageHint.showHint} text="💬 Send message" position="below" />
+                      <HintTooltip show={myCircleMessageHint.showHint} text="Send message" position="below" />
                     </div>
                   </div>
                 </div>
@@ -1586,7 +1589,7 @@ function PersonCard({ person, requested, onRequest }) {
         >
           {requested ? <><Check className="w-4 h-4" /> Request sent</> : <><UserPlus className="w-4 h-4" /> Request session</>}
         </button>
-        {!requested && <HintTooltip show={requestHint.showHint} text="👥 Send a mentorship request" position="above" />}
+        {!requested && <HintTooltip show={requestHint.showHint} text="Send a mentorship request" position="above" />}
       </div>
     </div>
   );

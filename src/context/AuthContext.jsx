@@ -8,6 +8,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [appUser, setAppUser] = useState(null);
+  const [isNewUser, setIsNewUser] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,13 +24,16 @@ export function AuthProvider({ children }) {
           const idToken = await user.getIdToken();
           const session = await syncSession(idToken, { picture: user.photoURL });
           setAppUser(session.user);
+          setIsNewUser(session.isNewUser || false);
         } catch {
           setAppUser(null);
+          setIsNewUser(false);
         } finally {
           setLoading(false);
         }
       } else {
         setAppUser(null);
+        setIsNewUser(false);
         setLoading(false);
       }
     });
@@ -42,6 +46,7 @@ export function AuthProvider({ children }) {
     const idToken = await user.getIdToken();
     const session = await syncSession(idToken, { identity, language });
     setAppUser(session.user);
+    setIsNewUser(session.isNewUser || false);
     return session;
   }, []);
 
@@ -57,6 +62,7 @@ export function AuthProvider({ children }) {
       share_interests: shareInterests,
     });
     setAppUser(session.user);
+    setIsNewUser(session.isNewUser || false);
     return session;
   }, []);
 
@@ -84,6 +90,7 @@ export function AuthProvider({ children }) {
   const value = {
     firebaseUser,
     appUser,
+    isNewUser,
     loading,
     signIn,
     signUp,

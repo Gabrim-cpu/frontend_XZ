@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, AlertCircle } from 'lucide-react';
+import { X, AlertCircle, Info } from 'lucide-react';
 import { createLibraryArticle } from '../services/apiService';
 
 const CATEGORIES = ['General', 'Philosophy', 'Career', 'Relationships', 'Health', 'Resilience'];
@@ -140,9 +140,10 @@ export default function CreateArticleModal({ isOpen, onClose, onSuccess }) {
           </div>
 
           {/* Info */}
-          <div className="bg-[#FBF1F0] rounded-lg p-4">
+          <div className="bg-[#FBF1F0] rounded-lg p-4 flex gap-3">
+            <Info className="w-5 h-5 text-brand-burgundy flex-shrink-0 mt-0.5" strokeWidth={1.75} />
             <p className="text-sm text-gray-700">
-              📋 <strong>Note:</strong> Articles are reviewed by moderators before publishing to ensure quality and relevance to our community.
+              <strong>Note:</strong> Articles are reviewed by moderators before publishing to ensure quality and relevance to our community.
             </p>
           </div>
 
@@ -160,7 +161,7 @@ export default function CreateArticleModal({ isOpen, onClose, onSuccess }) {
               disabled={loading}
               className="flex-1 px-5 py-3 md:py-2.5 rounded-xl text-sm md:text-base font-semibold bg-brand-burgundy text-white hover:bg-opacity-90 disabled:opacity-50 transition-all min-h-[48px] md:min-h-auto"
             >
-              {loading ? 'Submitting...' : '📚 Submit Article'}
+              {loading ? 'Submitting...' : 'Submit Article'}
             </button>
           </div>
         </form>

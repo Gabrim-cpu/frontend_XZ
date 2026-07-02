@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Loader } from 'lucide-react';
+import { Send, Loader, Heart } from 'lucide-react';
 import { getComments, addComment } from '../services/apiService';
 import Avatar from './Avatar';
 
@@ -122,8 +122,8 @@ export default function CommentsSection({ contentType, contentId, contentAuthor 
                 <p className="text-sm text-gray-700 leading-relaxed">
                   {comment.text}
                 </p>
-                <button className="text-xs text-gray-400 hover:text-brand-burgundy transition-colors mt-2">
-                  ♥ {comment.likes || 0}
+                <button className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-brand-burgundy transition-colors mt-2">
+                  <Heart className="w-3.5 h-3.5" strokeWidth={1.75} /> {comment.likes || 0}
                 </button>
               </div>
             </div>

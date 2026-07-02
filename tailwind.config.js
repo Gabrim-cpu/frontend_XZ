@@ -18,6 +18,8 @@ export default {
       fontFamily: {
         serif: ['Georgia', 'serif'],
         sans: ['Poppins', 'sans-serif'],
+        // Sophisticated minimalist display face for the brand wordmark.
+        display: ['Fraunces', 'Georgia', 'serif'],
       },
       spacing: {
         'safe-bottom': 'env(safe-area-inset-bottom)',

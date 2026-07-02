@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, AlertCircle } from 'lucide-react';
+import { X, AlertCircle, Lightbulb } from 'lucide-react';
 import { createStory } from '../services/apiService';
 
 export default function CreateStoryModal({ isOpen, onClose, onSuccess }) {
@@ -74,9 +74,10 @@ export default function CreateStoryModal({ isOpen, onClose, onSuccess }) {
           </div>
 
           {/* Note */}
-          <div className="bg-[#FBF1F0] rounded-lg p-4">
+          <div className="bg-[#FBF1F0] rounded-lg p-4 flex gap-3">
+            <Lightbulb className="w-5 h-5 text-brand-burgundy flex-shrink-0 mt-0.5" strokeWidth={1.75} />
             <p className="text-sm text-gray-700">
-              💡 <strong>Tip:</strong> Stories are moderated before publishing to maintain community quality.
+              <strong>Tip:</strong> Stories are moderated before publishing to maintain community quality.
             </p>
           </div>
 
@@ -94,7 +95,7 @@ export default function CreateStoryModal({ isOpen, onClose, onSuccess }) {
               disabled={loading}
               className="flex-1 px-5 py-3 md:py-2.5 rounded-xl text-sm md:text-base font-semibold bg-brand-burgundy text-white hover:bg-opacity-90 disabled:opacity-50 transition-all min-h-[48px] md:min-h-auto"
             >
-              {loading ? 'Publishing...' : '✨ Publish Story'}
+              {loading ? 'Publishing...' : 'Publish Story'}
             </button>
           </div>
         </form>

@@ -4,6 +4,8 @@ dist/
 build/
 .cache/
 
+
+
 # 2. Local Secret Environment Files (CRITICAL: Keeps keys off GitHub)
 .env
 .env.local
