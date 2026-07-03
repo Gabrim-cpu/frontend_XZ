@@ -5,6 +5,22 @@ import { loginUser, registerUser, signOutUser, syncSession } from '../services/a
 
 const AuthContext = createContext(null);
 
+// Sync with the backend, retrying briefly. Flaky DNS/network on the client
+// (e.g. mobile hotspots failing to resolve the API domain) otherwise strands
+// an authenticated user with no profile and a broken dashboard.
+async function syncSessionWithRetry(idToken, payload, attempts = 3) {
+  let lastError;
+  for (let i = 0; i < attempts; i += 1) {
+    try {
+      return await syncSession(idToken, payload);
+    } catch (err) {
+      lastError = err;
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+  throw lastError;
+}
+
 export function AuthProvider({ children }) {
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [appUser, setAppUser] = useState(null);
@@ -22,7 +38,7 @@ export function AuthProvider({ children }) {
         setLoading(true);
         try {
           const idToken = await user.getIdToken();
-          const session = await syncSession(idToken, { picture: user.photoURL });
+          const session = await syncSessionWithRetry(idToken, { picture: user.photoURL });
           setAppUser(session.user);
           setIsNewUser(session.isNewUser || false);
         } catch {
@@ -54,6 +70,7 @@ export function AuthProvider({ children }) {
     const user = await registerUser({ email, password, name, role, language, profilePicture });
     const idToken = await user.getIdToken();
     const session = await syncSession(idToken, {
+      name, // the token was minted before displayName was set — send explicitly
       identity: role,
       language,
       picture: profilePicture || user.photoURL,
@@ -78,7 +95,7 @@ export function AuthProvider({ children }) {
     if (!user) return null;
     try {
       const idToken = await user.getIdToken();
-      const session = await syncSession(idToken, { picture: user.photoURL });
+      const session = await syncSessionWithRetry(idToken, { picture: user.photoURL });
       setAppUser(session.user);
       return session.user;
     } catch (err) {

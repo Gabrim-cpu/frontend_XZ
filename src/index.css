@@ -8,3 +8,75 @@ body {
     color: #740A03;
     font-family: 'Poppins', sans-serif;
 }
+
+/* ---------- Dark theme ----------
+   Toggled by adding .dark to <html>. Instead of sprinkling dark: variants on
+   every element, we remap the light-theme utility palette to warm dark tones.
+   Two-class selectors outrank single utility classes, so no !important needed. */
+.dark body { background-color: #14100E; color: #E9D9D2; }
+
+.dark .bg-white { background-color: #201915; }
+.dark .bg-\[\#FBF9F8\] { background-color: #14100E; }
+.dark .bg-\[\#FBF9F6\] { background-color: #14100E; }
+.dark .bg-\[\#FBF1F0\] { background-color: rgba(233, 184, 174, 0.12); }
+.dark .bg-gray-50 { background-color: #261E19; }
+.dark .bg-gray-100 { background-color: #2C231E; }
+.dark .bg-gray-200 { background-color: #352A24; }
+.dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.14); }
+.dark .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.14); }
+.dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.14); }
+
+.dark .text-gray-900 { color: #F2EAE5; }
+.dark .text-gray-800 { color: #E5DAD3; }
+.dark .text-gray-700 { color: #D6C8C0; }
+.dark .text-gray-600 { color: #BCACA3; }
+.dark .text-gray-500 { color: #A08F86; }
+.dark .text-gray-400 { color: #877A72; }
+.dark .text-brand-burgundy { color: #E9A79A; }
+
+.dark .border-gray-100 { border-color: #2C231E; }
+.dark .border-gray-200 { border-color: #3A2E27; }
+.dark .border-gray-50 { border-color: #261E19; }
+
+.dark .hover\:bg-gray-50:hover { background-color: #261E19; }
+.dark .hover\:bg-gray-100:hover { background-color: #2C231E; }
+.dark .hover\:bg-gray-200:hover { background-color: #352A24; }
+.dark .hover\:bg-white:hover { background-color: #2C231E; }
+.dark .shadow-sm, .dark .shadow-md, .dark .shadow-lg, .dark .shadow-xl {
+    --tw-shadow-color: rgba(0, 0, 0, 0.55);
+    --tw-shadow: var(--tw-shadow-colored);
+}
+
+/* Remaining warm-cream arbitrary values used across the app */
+.dark .bg-\[\#FEFCFB\] { background-color: #1B1512; }
+.dark .bg-\[\#F4F2F1\] { background-color: #2C231E; }
+.dark .bg-\[\#FBF7F6\] { background-color: #241C18; }
+.dark .bg-\[\#F8F7F4\] { background-color: #1B1512; }
+.dark .bg-\[\#FDFBF9\] { background-color: #1B1512; }
+.dark .bg-white\/80 { background-color: rgba(32, 25, 21, 0.85); }
+.dark .bg-white\/60 { background-color: rgba(32, 25, 21, 0.6); }
+
+/* Stone palette (used by chat, dashboard, badges) */
+.dark .text-stone-400 { color: #877A72; }
+.dark .text-stone-500 { color: #A08F86; }
+.dark .text-stone-600 { color: #BCACA3; }
+.dark .text-stone-700 { color: #D6C8C0; }
+.dark .text-stone-800 { color: #E5DAD3; }
+.dark .text-stone-900 { color: #F2EAE5; }
+.dark .bg-stone-50 { background-color: #261E19; }
+.dark .bg-stone-100 { background-color: #2C231E; }
+.dark .bg-stone-200 { background-color: #352A24; }
+.dark .border-stone-100 { border-color: #2C231E; }
+.dark .border-stone-200 { border-color: #3A2E27; }
+
+/* Misc coherence fixes */
+.dark .text-gray-300 { color: #6B5F57; }
+.dark .divide-gray-100 > * + * { border-color: #2C231E; }
+.dark .border-gray-100\/50 { border-color: rgba(44, 35, 30, 0.5); }
+.dark input::placeholder, .dark textarea::placeholder { color: #7A6E66; }
+.dark .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.14); }
+.dark .text-emerald-700 { color: #34D399; }
+.dark .text-emerald-600 { color: #34D399; }
+.dark .text-amber-700 { color: #FBBF24; }
+.dark .text-red-700 { color: #F87171; }
+.dark .border-red-200 { border-color: rgba(239, 68, 68, 0.35); }

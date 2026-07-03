@@ -100,7 +100,7 @@ export default function Login() {
       <div className="min-h-screen w-full bg-brand-burgundy flex flex-col items-center justify-center px-4 text-white">
         <img src={logoXZ} alt="XZ" className="h-16 w-16 mb-6 brightness-0 invert" />
         <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-center">Welcome, {appUser.display_name}</h1>
-        <p className="text-white/70 text-base sm:text-lg mb-8">Entering the archive...</p>
+        <p className="text-white/70 text-base sm:text-lg mb-8">Signing you in...</p>
         <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
       </div>
     );
@@ -148,8 +148,8 @@ export default function Login() {
         {/* Mobile logo header */}
         <div className="lg:hidden flex items-center justify-center pt-8 pb-2">
           <button onClick={() => navigate('/')} className="flex items-center gap-2">
-            <img src={logoXZ} alt="XZ" className="w-8 h-8" />
-            <span className="text-lg font-bold text-brand-burgundy">XZ</span>
+            <img src={logoXZ} alt="XZ" className="w-11 h-11" />
+            <span className="text-sm font-bold text-brand-burgundy">XZ</span>
           </button>
         </div>
 
@@ -182,7 +182,7 @@ export default function Login() {
                     value={formData.email}
                     onChange={handleInputChange}
                     disabled={isSubmitting}
-                    placeholder="name@archive.com"
+                    placeholder="you@example.com"
                     className={`w-full pl-12 pr-4 py-3.5 bg-gray-100 border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-burgundy/30 focus:border-brand-burgundy focus:bg-white min-h-[52px] transition-colors ${
                       errors.email ? 'border-red-400 bg-red-50' : 'border-transparent'
                     }`}
@@ -239,7 +239,7 @@ export default function Login() {
                     Entering...
                   </>
                 ) : (
-                  <>Enter The Archive <ArrowRight className="w-5 h-5" /></>
+                  <>Sign In <ArrowRight className="w-5 h-5" /></>
                 )}
               </button>
             </form>
@@ -277,7 +277,7 @@ export default function Login() {
 
             {/* Footer note */}
             <p className="text-center text-[10px] text-gray-300 uppercase tracking-[0.2em] pt-2">
-              Secure Encryption · Editorial Access V2.4
+              Digital Roots · Secure Sign-In
             </p>
           </div>
         </div>

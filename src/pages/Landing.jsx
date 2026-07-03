@@ -4,8 +4,8 @@ import { ArrowRight, BookOpen, Users, MessageCircle, Video, ChevronDown } from '
 import logoWhite from '../Assets/logo_blanc-removebg-preview (1).png';
 import laptopImg from '../Assets/intergenerational_laptop.png';
 
-// The two words that swap in the hero headline.
-const SWAP_WORDS = ['teach', 'learn'];
+// The words that rotate in the hero headline.
+const SWAP_WORDS = ['teach', 'learn', 'share', 'preserve', 'build', 'pass on'];
 
 // Fires once when an element scrolls into view. Uses IntersectionObserver so it
 // works regardless of which element is the scroll container.
@@ -28,6 +28,119 @@ function useInView(options) {
     return () => obs.disconnect();
   }, []);
   return [ref, inView];
+}
+
+/* ---- Premium duotone spot illustrations.
+   Strict palette: brand burgundy (#740A03 + its shades), amber accent,
+   and warm neutral creams. Nothing else. ---- */
+
+// An elder passing an open book to a youth — silhouettes in burgundy,
+// the knowledge itself carrying the single amber accent.
+function GenerationsIllustration({ className }) {
+  return (
+    <svg viewBox="0 0 260 170" fill="none" className={className} aria-hidden="true">
+      {/* warm backdrop blob */}
+      <path
+        d="M130 6c62 0 118 30 118 80 0 48-50 76-118 76S12 134 12 86C12 36 68 6 130 6z"
+        fill="#F6EFE7"
+      />
+      {/* ground shadows */}
+      <ellipse cx="64" cy="142" rx="34" ry="6" fill="#EADFD2" />
+      <ellipse cx="196" cy="142" rx="30" ry="6" fill="#EADFD2" />
+      {/* dotted arc of exchange */}
+      <path
+        d="M84 44C108 26 156 28 176 48"
+        stroke="#740A03"
+        strokeOpacity="0.28"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeDasharray="0.5 9"
+      />
+      {/* elder — silhouette with bun, deep burgundy */}
+      <path d="M36 142c0-32 12-48 28-48s28 16 28 48z" fill="#740A03" />
+      <circle cx="64" cy="70" r="18" fill="#740A03" />
+      <circle cx="46" cy="54" r="7" fill="#740A03" />
+      <path d="M84 108c14-4 26-6 36-5" stroke="#740A03" strokeWidth="11" strokeLinecap="round" />
+      {/* youth — smaller silhouette, lighter burgundy shade */}
+      <path d="M168 142c0-27 11-41 25-41s25 14 25 41z" fill="#9C3325" />
+      <circle cx="193" cy="80" r="15" fill="#9C3325" />
+      <path d="M176 112c-12-4-24-6-34-6" stroke="#9C3325" strokeWidth="10" strokeLinecap="round" />
+      {/* the open book passing between them — the amber accent */}
+      <path d="M131 90c-8-6-17-8-24-6v16c7-2 16 0 24 6z" fill="#FCD34D" />
+      <path d="M131 90c8-6 17-8 24-6v16c-7 2-16 0-24 6z" fill="#F59E0B" />
+      <path d="M131 90v16" stroke="#FFFFFF" strokeWidth="1.5" />
+      {/* sparkles rising off the book */}
+      <path d="M131 58l3.2 8 8 3.2-8 3.2-3.2 8-3.2-8-8-3.2 8-3.2z" fill="#F59E0B" />
+      <path d="M156 68l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#FCD34D" />
+      <circle cx="110" cy="62" r="2.5" fill="#F59E0B" opacity="0.6" />
+    </svg>
+  );
+}
+
+// A tree whose roots run as deep as its canopy — connection that grows.
+function RootsTreeIllustration({ className }) {
+  return (
+    <svg viewBox="0 0 240 230" fill="none" className={className} aria-hidden="true">
+      {/* warm backdrop */}
+      <ellipse cx="120" cy="100" rx="104" ry="94" fill="#F6EFE7" />
+      {/* layered canopy — two amber tones only */}
+      <circle cx="120" cy="64" r="44" fill="#F59E0B" />
+      <circle cx="86" cy="84" r="30" fill="#F59E0B" />
+      <circle cx="154" cy="84" r="30" fill="#F59E0B" />
+      <circle cx="120" cy="88" r="34" fill="#FCD34D" />
+      {/* fruit */}
+      <circle cx="98" cy="58" r="4" fill="#740A03" />
+      <circle cx="144" cy="62" r="4" fill="#740A03" />
+      <circle cx="118" cy="92" r="4" fill="#740A03" />
+      <circle cx="158" cy="94" r="4" fill="#740A03" />
+      <circle cx="82" cy="92" r="4" fill="#740A03" />
+      {/* perched bird — burgundy silhouette */}
+      <path d="M158 36c0-7 5-12 12-12s12 5 12 11c0 8-7 12-13 12-6 0-11-5-11-11z" fill="#740A03" />
+      <path d="M182 33l8 3-8 3z" fill="#4A0602" />
+      <circle cx="176" cy="32" r="1.5" fill="#FFFFFF" />
+      {/* trunk — burgundy, matching the roots */}
+      <path d="M112 108c2 20 1 38-6 60h28c-7-22-8-40-6-60z" fill="#740A03" />
+      <path d="M116 122l-14-12M124 122l14-12" stroke="#740A03" strokeWidth="5" strokeLinecap="round" />
+      {/* ground */}
+      <path d="M28 168c26-10 158-10 184 0z" fill="#EDE2D1" />
+      <path d="M20 168h200" stroke="#E3D5C0" strokeWidth="3" strokeLinecap="round" />
+      {/* roots mirroring the canopy */}
+      <path
+        d="M120 168v42M120 176c-12 12-28 16-44 18M120 176c12 12 28 16 44 18M120 190c-7 10-15 15-23 19M120 190c7 10 15 15 23 19"
+        stroke="#740A03"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+// Two speech bubbles trading knowledge — used on the dark CTA band.
+function ExchangeIllustration({ className }) {
+  return (
+    <svg viewBox="0 0 220 130" fill="none" className={className} aria-hidden="true">
+      {/* left bubble (with drop shadow) */}
+      <rect x="23" y="21" width="96" height="56" rx="16" fill="#4A0602" />
+      <path d="M49 77l-6 20 24-20z" fill="#4A0602" />
+      <rect x="18" y="16" width="96" height="56" rx="16" fill="#FFFFFF" />
+      <path d="M44 72l-6 20 24-20z" fill="#FFFFFF" />
+      <path d="M38 38h58" stroke="#740A03" strokeWidth="4" strokeLinecap="round" />
+      <path d="M38 52h40" stroke="#740A03" strokeOpacity="0.35" strokeWidth="4" strokeLinecap="round" />
+      {/* right bubble (with drop shadow) */}
+      <rect x="127" y="47" width="80" height="52" rx="16" fill="#4A0602" />
+      <path d="M185 99l6 18-22-18z" fill="#4A0602" />
+      <rect x="122" y="42" width="80" height="52" rx="16" fill="#FCD34D" />
+      <path d="M180 94l6 18-22-18z" fill="#FCD34D" />
+      <path
+        d="M162 82c-10-6-16-12-16-19 0-5 4-9 9-9 3 0 6 2 7 5 1-3 4-5 7-5 5 0 9 4 9 9 0 7-6 13-16 19z"
+        fill="#740A03"
+      />
+      {/* sparkles */}
+      <path d="M110 8l2.5 6.5 6.5 2.5-6.5 2.5-2.5 6.5-2.5-6.5-6.5-2.5 6.5-2.5z" fill="#FCD34D" />
+      <circle cx="206" cy="24" r="3" fill="#FFFFFF" opacity="0.7" />
+      <circle cx="14" cy="96" r="3" fill="#FCD34D" />
+    </svg>
+  );
 }
 
 const FEATURES = [
@@ -142,9 +255,9 @@ export default function Landing() {
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-6 sm:py-4">
-          <div className="flex items-center gap-3">
-            <img src={logoWhite} alt="XZ" className="h-10 w-10 sm:h-12 sm:w-12" />
-            <span className="font-display text-xl font-semibold tracking-tight text-white sm:text-2xl">
+          <div className="flex items-center gap-2.5">
+            <img src={logoWhite} alt="XZ" className="h-14 w-14 sm:h-16 sm:w-16" />
+            <span className="font-display text-base font-semibold tracking-tight text-white sm:text-lg">
               Digital Roots
             </span>
           </div>
@@ -165,8 +278,7 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero — single static background image. `bg-gray-900` is the fallback
-          so text stays legible even if the image is slow to load. */}
+      {/* Hero  */}
       <section className="relative flex min-h-[92vh] items-center justify-center overflow-hidden bg-gray-900 px-5 py-20 sm:px-6">
         {/* Background */}
         <div className="absolute inset-0 z-0" aria-hidden="true">
@@ -194,15 +306,14 @@ export default function Landing() {
             .
           </h1>
           <p className="reveal reveal-200 mx-auto mt-6 max-w-2xl text-base leading-relaxed text-gray-100 sm:text-lg md:text-xl">
-            From digital skills to cultural heritage, XZ builds meaningful connections between
-            youth and elders through reciprocal learning and authentic conversation.
+           Connect with someone from another generation to exchange skills, preserve culture, and grow meaningful relationships powered by reciprocal learning.
           </p>
           <div className="reveal reveal-300 mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <button
               onClick={() => navigate('/register')}
               className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-burgundy px-8 py-4 text-base font-bold text-white transition-all hover:bg-opacity-90 sm:w-auto min-h-[56px]"
             >
-              Join XZ today <ArrowRight className="h-5 w-5" />
+              Join XZ today 
             </button>
             <button
               onClick={() => navigate('/login')}
@@ -227,12 +338,12 @@ export default function Landing() {
         {/* Morphing blob backdrop */}
         <div
           aria-hidden
-          className="morph-blob pointer-events-none absolute left-1/2 top-1/2 -z-0 h-[22rem] w-[22rem] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-brand-burgundy/10 via-brand-roseMuted/10 to-amber-100/20 blur-2xl sm:h-[30rem] sm:w-[30rem]"
+          className="morph-blob pointer-events-none absolute left-1/2 top-1/2 -z-0 h-[22rem] w-[22rem] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-brand-burgundy/10 via-amber-100/30 to-amber-100/10 blur-2xl sm:h-[30rem] sm:w-[30rem]"
         />
         <div className="relative z-10 mx-auto max-w-3xl space-y-6 text-center">
-          <p className={`text-sm font-semibold uppercase tracking-[0.2em] text-brand-burgundy ${missionInView ? 'reveal-in' : 'reveal-init'}`}>
-            Our purpose
-          </p>
+          <GenerationsIllustration
+            className={`mx-auto w-56 sm:w-72 ${missionInView ? 'reveal-in' : 'reveal-init'}`}
+          />
           <h2 className={`font-display text-4xl font-semibold tracking-tight sm:text-5xl ${missionInView ? 'reveal-in' : 'reveal-init'}`}>
             Why XZ exists
           </h2>
@@ -273,18 +384,21 @@ export default function Landing() {
 
       {/* Roots strength */}
       <section className="px-5 py-20 sm:px-6 sm:py-24">
-        <div className="mx-auto max-w-3xl space-y-6 text-center">
-          <h2 className="text-3xl font-bold sm:text-4xl">Relationships that grow over time</h2>
-          <p className="text-base leading-relaxed text-gray-600 sm:text-lg">
-            Unlike networks that measure popularity, XZ measures the strength of meaningful
-            connection. Every conversation, lesson, and shared experience helps your roots grow
-            deeper.
-          </p>
-          <div className="inline-flex items-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-5 text-left shadow-sm sm:px-8 sm:py-6">
-            <span className="text-3xl font-bold text-brand-burgundy">→</span>
-            <div>
-              <div className="text-sm font-semibold text-gray-500">Meaningful growth comes from</div>
-              <div className="text-lg font-bold sm:text-xl">Real connections, not metrics</div>
+        <div className="mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-2 md:gap-16">
+          <RootsTreeIllustration className="mx-auto w-52 sm:w-64 md:order-2" />
+          <div className="space-y-6 text-center md:order-1 md:text-left">
+            <h2 className="text-3xl font-bold sm:text-4xl">Relationships that grow over time</h2>
+            <p className="text-base leading-relaxed text-gray-600 sm:text-lg">
+              Unlike networks that measure popularity, XZ measures the strength of meaningful
+              connection. Every conversation, lesson, and shared experience helps your roots grow
+              deeper.
+            </p>
+            <div className="inline-flex items-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-5 text-left shadow-sm sm:px-8 sm:py-6">
+              <span className="text-3xl font-bold text-brand-burgundy">→</span>
+              <div>
+                <div className="text-sm font-semibold text-gray-500">Meaningful growth comes from</div>
+                <div className="text-lg font-bold sm:text-xl">Real connections, not metrics</div>
+              </div>
             </div>
           </div>
         </div>
@@ -293,6 +407,7 @@ export default function Landing() {
       {/* Final CTA */}
       <section className="bg-brand-burgundy px-5 py-20 text-white sm:px-6 sm:py-24">
         <div className="mx-auto max-w-3xl space-y-6 text-center">
+          <ExchangeIllustration className="mx-auto w-44 sm:w-52" />
           <h2 className="text-3xl font-bold sm:text-4xl">Your knowledge matters. So does theirs.</h2>
           <p className="text-base leading-relaxed text-white/90 sm:text-lg">
             Join a new generation of learners, mentors, storytellers, and innovators building
@@ -314,8 +429,8 @@ export default function Landing() {
       >
         <div className="mx-auto max-w-6xl text-center">
           <div className="mb-3 flex items-center justify-center gap-2">
-            <img src={logoWhite} alt="XZ" className="h-10 w-10" />
-            <span className="font-display text-2xl font-semibold tracking-tight text-white">
+            <img src={logoWhite} alt="XZ" className="h-12 w-12" />
+            <span className="font-display text-lg font-semibold tracking-tight text-white">
               Digital Roots
             </span>
           </div>
