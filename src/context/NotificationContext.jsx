@@ -28,6 +28,48 @@ export function iconForType(type) {
   return ICONS[type] || Bell;
 }
 
+// Which dashboard tab a notification should open when clicked.
+const TAB_FOR_TYPE = {
+  connection_request: 'mentorship',
+  connection_accepted: 'mentorship',
+  message: 'messages',
+  badge: 'home',
+  story_created: 'wisdom',
+  article_published: 'wisdom',
+  new_reflection: 'wisdom',
+};
+
+export function tabForType(type) {
+  return TAB_FOR_TYPE[type] || 'home';
+}
+
+// Soft two-tone chime, synthesized so we don't need an audio asset.
+// Browsers block audio before the first user gesture — fail silently then.
+function playChime() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const tone = (freq, start, dur) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + dur);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + dur + 0.05);
+    };
+    tone(880, 0, 0.3); // A5
+    tone(1318.5, 0.11, 0.38); // E6 — gentle upward interval
+    setTimeout(() => ctx.close().catch(() => {}), 1000);
+  } catch {
+    /* unsupported or blocked — stay silent */
+  }
+}
+
 const toMillis = (createdAt) => {
   // Firestore serverTimestamp may briefly be null on the local write before the
   // server value lands; treat that as "now" so ordering stays sensible.
@@ -68,8 +110,10 @@ export function NotificationProvider({ children }) {
         // Toast only for items that arrive AFTER the initial load, and only the
         // important ones. The first snapshot is existing history → no toasts.
         if (initializedRef.current) {
+          let hasNew = false;
           snapshot.docChanges().forEach((change) => {
             if (change.type !== 'added') return;
+            hasNew = true;
             const data = change.doc.data();
             if (!data.important) return;
             const id = change.doc.id;
@@ -80,6 +124,7 @@ export function NotificationProvider({ children }) {
               setToasts((prev) => prev.filter((t) => t.id !== id));
             }, 6000);
           });
+          if (hasNew) playChime();
         }
         initializedRef.current = true;
       },

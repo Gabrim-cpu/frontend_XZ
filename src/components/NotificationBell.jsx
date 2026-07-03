@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
-import { useNotifications, iconForType } from '../context/NotificationContext';
+import { useNotifications, iconForType, tabForType } from '../context/NotificationContext';
 
 const timeAgo = (createdAt) => {
   const ms = createdAt?.toMillis ? createdAt.toMillis() : (createdAt ? new Date(createdAt).getTime() : Date.now());
@@ -17,6 +18,15 @@ export default function NotificationBell() {
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const navigate = useNavigate();
+
+  // Open the dashboard tab the notification came from. `ts` makes the state
+  // object unique so repeated clicks on the same tab still re-trigger it.
+  const openNotification = (n) => {
+    markRead(n.id);
+    setOpen(false);
+    navigate('/dashboard', { state: { tab: tabForType(n.type), ts: Date.now() } });
+  };
 
   useEffect(() => {
     const onClick = (e) => {
@@ -63,7 +73,7 @@ export default function NotificationBell() {
                 return (
                   <button
                     key={n.id}
-                    onClick={() => markRead(n.id)}
+                    onClick={() => openNotification(n)}
                     className={`w-full text-left flex items-start gap-3 px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition ${
                       n.read ? '' : 'bg-[#FBF7F6]'
                     }`}

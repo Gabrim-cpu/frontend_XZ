@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 
-const JITSI_DOMAIN = 'meet.jit.si';
+// NOTE: meet.jit.si stopped allowing anonymous users to START rooms in 2023 —
+// callers were stuck on a "waiting for an authenticated user" screen forever.
+// meet.ffmuc.net (Freifunk München) is a public instance that still permits
+// anonymous rooms. For production scale, self-host Jitsi or use JaaS (8x8.vc).
+const JITSI_DOMAIN = 'meet.ffmuc.net';
 const SCRIPT_SRC = `https://${JITSI_DOMAIN}/external_api.js`;
 
 /**

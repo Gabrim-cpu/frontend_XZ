@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Menu, X, Home, MessageCircle, BookOpen, Users, Settings as SettingsIcon, LogOut, Search, Bell, HelpCircle, Plus, Diamond, Send, Mic, Paperclip, Smile, Phone, Video, MoreVertical, Square, Play, Check, UserPlus, Clock, Sparkles, Library, User, Shield } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, Home, MessageCircle, BookOpen, Users, Settings as SettingsIcon, LogOut, Search, Bell, HelpCircle, Plus, Diamond, Send, Mic, Paperclip, Smile, Phone, Video, MoreVertical, Square, Play, Check, UserPlus, Clock, Sparkles, Library, User, Shield, Star, Award, Image as ImageIcon, ArrowRight, Moon, Sun, Heart, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { getThreads, getMessages, sendMessage, uploadChatMedia, getRecommendations, getAllUsers, requestConnection, getPendingRequests, acceptConnection, rejectConnection, getAcceptedConnections, getFeed, createPost, getStories, getLibrary } from '../services/apiService';
+import { getThreads, getMessages, sendMessage, uploadChatMedia, getRecommendations, getAllUsers, requestConnection, getPendingRequests, acceptConnection, rejectConnection, getAcceptedConnections, getFeed, createPost, getStories, getLibrary, getPointsSummary, togglePostLike, getPublicProfile } from '../services/apiService';
+import BadgeDisplay from '../components/BadgeDisplay';
+import { compressImage, fileToDataUrl, blobToDataUrl } from '../utils/imageUtils';
 import { updateProfile } from '../services/authService';
 import NotificationBell from '../components/NotificationBell';
 import VideoCall, { makeRoomName } from '../components/VideoCall';
@@ -22,10 +24,13 @@ const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function WisdomHub() {
   const navigate = useNavigate();
+  const location = useLocation();
   const auth = useAuth();
-  const { language, changeLanguage } = useLanguage();
+  const { language, changeLanguage, t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('xz-theme') === 'dark');
+  const [onlineUsers, setOnlineUsers] = useState([]);
   // When set, the Messages tab opens this specific connection's conversation.
   const [chatTarget, setChatTarget] = useState(null);
   // Modals for content creation
@@ -39,6 +44,9 @@ export default function WisdomHub() {
 
   // Active video/voice call overlay (Jitsi). `null` when no call is in progress.
   const [call, setCall] = useState(null);
+
+  // "View profile" popup: the user id being viewed, or null.
+  const [profileUserId, setProfileUserId] = useState(null);
 
   // Start a call with another user. The room name is derived from both ids so
   // each side independently computes the SAME room and meets there.
@@ -60,6 +68,35 @@ export default function WisdomHub() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Dark theme: toggled on <html> so the CSS overrides in index.css apply app-wide.
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('xz-theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
+  // Open the tab a notification click asked for (NotificationBell navigates
+  // here with { state: { tab } }).
+  useEffect(() => {
+    if (location.state?.tab) setActiveTab(location.state.tab);
+  }, [location.state]);
+
+  // Presence: announce ourselves and track which users are online.
+  useEffect(() => {
+    if (!appUser?.id) return;
+    const socket = io(SOCKET_URL);
+    socket.emit('join', appUser.id);
+    socket.on('presence', (ids) => setOnlineUsers(Array.isArray(ids) ? ids : []));
+    return () => socket.disconnect();
+  }, [appUser?.id]);
+
+  // Collapse the sidebar to an icon rail while the user scrolls the content,
+  // giving the feed the full width; expand again near the top. The two
+  // thresholds add hysteresis so it doesn't flicker at the boundary.
+  const handleContentScroll = (e) => {
+    const y = e.currentTarget.scrollTop;
+    setSidebarOpen((open) => (open ? y < 80 : y < 20));
+  };
+
   const handleLogout = async () => {
     if (auth?.logout) {
       await auth.logout();
@@ -68,23 +105,25 @@ export default function WisdomHub() {
   };
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'messages', label: 'Messages', icon: MessageCircle },
-    { id: 'wisdom', label: 'The Archive', icon: BookOpen },
-    { id: 'mentorship', label: 'Mentorship', icon: Users },
-    { id: 'settings', label: 'Settings', icon: SettingsIcon },
+    { id: 'home', label: t('feed'), icon: Home },
+    { id: 'messages', label: t('messages'), icon: MessageCircle },
+    { id: 'wisdom', label: t('wisdomArchive'), icon: BookOpen },
+    { id: 'mentorship', label: t('mentorshipTab'), icon: Users },
+    { id: 'settings', label: t('settingsTab'), icon: SettingsIcon },
   ];
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-[#FBF9F8]" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-      {/* Sidebar — Desktop only */}
-      <div className="hidden md:flex md:w-56 bg-white border-r border-gray-100 flex-col flex-shrink-0">
-        <div className="px-5 py-5 flex items-center gap-2">
-          <img src={logoXZ} alt="XZ" className="w-7 h-7" />
-          <div>
-            <h1 className="text-base font-serif font-bold text-brand-burgundy leading-none">The Archive</h1>
-            <p className="text-[10px] text-gray-400 mt-0.5">Bridging Generations</p>
-          </div>
+      {/* Sidebar — Desktop only. Collapses to an icon rail while scrolling. */}
+      <div className={`hidden md:flex bg-white border-r border-gray-100 flex-col flex-shrink-0 transition-all duration-300 ${sidebarOpen ? 'md:w-56' : 'md:w-[4.5rem]'}`}>
+        <div className={`py-5 flex items-center gap-2 ${sidebarOpen ? 'px-5' : 'px-0 justify-center'}`}>
+          <img src={logoXZ} alt="XZ" className="w-7 h-7 flex-shrink-0" />
+          {sidebarOpen && (
+            <div className="overflow-hidden whitespace-nowrap">
+              <h1 className="text-base font-serif font-bold text-brand-burgundy leading-none">Digital Roots</h1>
+              <p className="text-[10px] text-gray-400 mt-0.5">Bridging Generations</p>
+            </div>
+          )}
         </div>
 
         <nav className="flex-1 py-2 px-3 space-y-0.5">
@@ -95,27 +134,52 @@ export default function WisdomHub() {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-sm min-h-[48px] ${
+                title={item.label}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-sm min-h-[48px] ${sidebarOpen ? '' : 'justify-center'} ${
                   active
                     ? 'bg-[#FBF1F0] text-brand-burgundy font-semibold'
                     : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
                 }`}
               >
-                <Icon className="w-5 h-5" />
-                <span>{item.label}</span>
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {sidebarOpen && <span className="whitespace-nowrap overflow-hidden">{item.label}</span>}
               </button>
             );
           })}
+
+          {/* Dark theme toggle */}
+          <button
+            onClick={() => setDarkMode((v) => !v)}
+            title={darkMode ? t('lightTheme') : t('darkTheme')}
+            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-sm min-h-[48px] text-gray-500 hover:bg-gray-50 hover:text-gray-800 ${sidebarOpen ? '' : 'justify-center'}`}
+          >
+            {darkMode ? <Sun className="w-5 h-5 flex-shrink-0" /> : <Moon className="w-5 h-5 flex-shrink-0" />}
+            {sidebarOpen && <span className="whitespace-nowrap overflow-hidden">{darkMode ? t('lightTheme') : t('darkTheme')}</span>}
+          </button>
         </nav>
 
         <div className="p-3">
           <button
             onClick={() => setActiveTab('mentorship')}
+            title={t('newConnection')}
             className="w-full flex items-center justify-center gap-2 bg-brand-burgundy text-white px-4 py-3 rounded-xl font-semibold text-sm hover:bg-opacity-90 transition-all min-h-[48px]"
           >
-            <Plus className="w-5 h-5" />
-            New Connection
+            <Plus className="w-5 h-5 flex-shrink-0" />
+            {sidebarOpen && <span className="whitespace-nowrap">{t('newConnection')}</span>}
           </button>
+        </div>
+
+        {/* Current user — with online presence dot */}
+        <div className={`p-3 pt-0 ${sidebarOpen ? '' : 'flex justify-center'}`}>
+          <div className={`flex items-center gap-2.5 rounded-xl bg-gray-50 ${sidebarOpen ? 'px-3 py-2.5' : 'p-2'}`}>
+            <div className="relative flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-brand-burgundy flex items-center justify-center text-white font-bold text-sm overflow-hidden">
+                {userAvatar ? <img src={userAvatar} alt={userName} className="w-full h-full object-cover" /> : userName?.[0]?.toUpperCase() || 'U'}
+              </div>
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white" />
+            </div>
+            {sidebarOpen && <span className="text-sm font-semibold text-gray-800 truncate">{userName}</span>}
+          </div>
         </div>
       </div>
 
@@ -125,16 +189,10 @@ export default function WisdomHub() {
         <div className="bg-brand-burgundy px-4 py-3 flex items-center justify-between gap-3 border-b border-gray-100/50 md:bg-[#FBF9F8]">
           <div className="flex-1">
             <img src={logoXZ} alt="XZ" className="w-6 h-6 md:hidden" />
-            <h1 className="hidden md:block text-lg font-serif font-bold text-brand-burgundy">Wisdom Hub</h1>
+            <h1 className="hidden md:block text-lg font-serif font-bold text-brand-burgundy">{navItems.find((n) => n.id === activeTab)?.label || 'Digital Roots'}</h1>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-white/20 md:bg-[#FBF1F0] text-white md:text-brand-burgundy px-2.5 py-1 rounded-full font-semibold text-xs min-h-[32px]">
-              <Diamond className="w-3 h-3 fill-current" />
-              {userPoints.toLocaleString()}
-            </div>
-            <div className="md:block hidden">
-              <NotificationBell />
-            </div>
+            <NotificationBell />
             <button onClick={() => setActiveTab('settings')} className="w-10 h-10 bg-white md:bg-brand-burgundy rounded-full flex items-center justify-center text-brand-burgundy md:text-white font-bold text-sm overflow-hidden min-h-[44px]">
               {userAvatar ? (
                 <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
@@ -147,11 +205,11 @@ export default function WisdomHub() {
 
         {/* Content */}
         <div className="flex-1 overflow-hidden">
-          {activeTab === 'home' && <div className="overflow-auto h-full"><HomeContent userName={userName} userAvatar={userAvatar} currentUser={appUser} /></div>}
-          {activeTab === 'wisdom' && <div className="overflow-auto h-full"><ArchiveContent onCreateStory={() => setShowCreateStory(true)} onCreateArticle={() => setShowCreateArticle(true)} /></div>}
-          {activeTab === 'messages' && <MessagesContent currentUser={appUser} chatTarget={chatTarget} onConsumeTarget={() => setChatTarget(null)} onStartCall={startCall} />}
-          {activeTab === 'settings' && <div className="overflow-auto h-full"><SettingsContent userName={userName} userEmail={userEmail} appUser={appUser} onLogout={handleLogout} language={language} changeLanguage={changeLanguage} auth={auth} /></div>}
-          {activeTab === 'mentorship' && <div className="overflow-auto h-full"><MentorshipContent currentUser={appUser} onOpenChat={openChatWith} onStartCall={startCall} /></div>}
+          {activeTab === 'home' && <div className="overflow-auto h-full" onScroll={handleContentScroll}><HomeContent userName={userName} userAvatar={userAvatar} currentUser={appUser} isNewUser={isNewUser} onStartRecording={() => navigate('/recording')} onBrowseArchive={() => setActiveTab('wisdom')} onOpenProfile={setProfileUserId} /></div>}
+          {activeTab === 'wisdom' && <div className="overflow-auto h-full" onScroll={handleContentScroll}><ArchiveContent onCreateStory={() => setShowCreateStory(true)} onCreateArticle={() => setShowCreateArticle(true)} onRecord={() => navigate('/recording')} /></div>}
+          {activeTab === 'messages' && <MessagesContent currentUser={appUser} chatTarget={chatTarget} onConsumeTarget={() => setChatTarget(null)} onStartCall={startCall} onlineUsers={onlineUsers} onOpenProfile={setProfileUserId} />}
+          {activeTab === 'settings' && <div className="overflow-auto h-full"><SettingsContent userName={userName} userEmail={userEmail} appUser={appUser} onLogout={handleLogout} language={language} changeLanguage={changeLanguage} auth={auth} darkMode={darkMode} onToggleDark={() => setDarkMode((v) => !v)} /></div>}
+          {activeTab === 'mentorship' && <div className="overflow-auto h-full" onScroll={handleContentScroll}><MentorshipContent currentUser={appUser} onOpenChat={openChatWith} onStartCall={startCall} onlineUsers={onlineUsers} onOpenProfile={setProfileUserId} /></div>}
         </div>
       </div>
 
@@ -204,12 +262,168 @@ export default function WisdomHub() {
           setActiveTab('wisdom');
         }}
       />
+      {profileUserId && (
+        <UserProfileModal
+          userId={profileUserId}
+          isSelf={profileUserId === appUser?.id}
+          onClose={() => setProfileUserId(null)}
+          onMessage={(user) => {
+            setProfileUserId(null);
+            openChatWith({ id: user.id, participantName: user.display_name, participantAvatar: user.avatar_url, participantIdentity: user.identity });
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ============ USER PROFILE POPUP ============ */
+const LANGUAGE_LABELS = { en: 'English', fr: 'Français' };
+
+function UserProfileModal({ userId, isSelf, onClose, onMessage }) {
+  const { t } = useLanguage();
+  const [profile, setProfile] = useState(null);
+  const [failed, setFailed] = useState(false);
+  const [connectState, setConnectState] = useState('idle'); // idle | sending | sent | error
+
+  useEffect(() => {
+    setProfile(null);
+    setFailed(false);
+    setConnectState('idle');
+    getPublicProfile(userId)
+      .then((data) => setProfile(data.user))
+      .catch(() => setFailed(true));
+  }, [userId]);
+
+  const handleConnect = async () => {
+    if (connectState === 'sending' || connectState === 'sent') return;
+    setConnectState('sending');
+    try {
+      await requestConnection(userId);
+      setConnectState('sent');
+    } catch (err) {
+      // "Already connected / already pending" also means there's nothing to do.
+      if (/already/i.test(err.message)) setConnectState('sent');
+      else setConnectState('error');
+    }
+  };
+
+  const interests = [
+    ...new Set([...(profile?.share_interests || []), ...(profile?.learn_interests || [])]),
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" onClick={onClose}>
+      <div
+        className="bg-white rounded-3xl w-full max-w-sm max-h-[90vh] overflow-y-auto shadow-2xl p-6 relative animate-fade-in-up"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button onClick={onClose} aria-label="Close" className="absolute top-4 right-4 text-gray-300 hover:text-gray-600 p-1">
+          <X className="w-5 h-5" />
+        </button>
+
+        {failed ? (
+          <p className="text-sm text-gray-500 text-center py-10">{t('profileLoadFailed')}</p>
+        ) : !profile ? (
+          <div className="flex justify-center py-14">
+            <div className="w-8 h-8 border-2 border-brand-burgundy/20 border-t-brand-burgundy rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="text-center">
+            <div className="w-24 h-24 mx-auto rounded-2xl bg-gray-200 overflow-hidden flex items-center justify-center text-3xl font-bold text-gray-500">
+              {profile.avatar_url ? (
+                <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" />
+              ) : (
+                profile.display_name?.[0]?.toUpperCase() || '?'
+              )}
+            </div>
+            <h2 className="mt-4 text-xl font-serif font-bold text-gray-900">{profile.display_name}</h2>
+            {profile.identity && (
+              <span className="inline-block mt-2 px-3 py-1 rounded-full border border-brand-burgundy/30 text-brand-burgundy text-xs font-bold uppercase tracking-wide">
+                {profile.identity}
+              </span>
+            )}
+
+            {/* Stats */}
+            <div className="mt-5 grid grid-cols-2 divide-x divide-gray-100 border-y border-gray-100 py-4">
+              <div>
+                <p className="text-xl font-bold text-gray-900">{profile.post_count ?? 0}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('postsLabel')}</p>
+              </div>
+              <div>
+                <p className="text-xl font-bold text-gray-900">{profile.root_points ?? 0}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{t('rootPoints')}</p>
+              </div>
+            </div>
+
+            {profile.bio && (
+              <div className="mt-4 bg-gray-50 rounded-2xl p-4 text-left">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">{t('aboutLabel')}</p>
+                <p className="text-sm text-gray-600 italic leading-relaxed">"{profile.bio}"</p>
+              </div>
+            )}
+
+            {profile.language && (
+              <div className="mt-4 text-left">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">{t('spokenLanguages')}</p>
+                <span className="inline-flex items-center gap-1.5 border border-gray-200 rounded-full px-3 py-1.5 text-xs font-semibold text-gray-700">
+                  <Globe className="w-3.5 h-3.5" /> {LANGUAGE_LABELS[profile.language] || profile.language}
+                </span>
+              </div>
+            )}
+
+            {interests.length > 0 && (
+              <div className="mt-4 text-left">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">{t('interestsTopics')}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {interests.map((tag, i) => (
+                    <span key={i} className="border border-brand-burgundy/25 text-brand-burgundy rounded-lg px-2.5 py-1 text-xs font-semibold capitalize">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!isSelf && (
+              <div className="mt-6 space-y-2">
+                <button
+                  onClick={handleConnect}
+                  disabled={connectState === 'sending' || connectState === 'sent'}
+                  className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold text-sm transition-all min-h-[52px] ${
+                    connectState === 'sent'
+                      ? 'bg-emerald-50 text-emerald-700 cursor-default'
+                      : 'bg-brand-burgundy text-white hover:bg-opacity-90 disabled:opacity-60'
+                  }`}
+                >
+                  {connectState === 'sent' ? (
+                    <><Check className="w-4 h-4" /> {t('requestSent')}</>
+                  ) : connectState === 'sending' ? (
+                    t('sending')
+                  ) : (
+                    <><UserPlus className="w-4 h-4" /> {t('connect')}</>
+                  )}
+                </button>
+                {connectState === 'error' && (
+                  <p className="text-xs text-red-500">{t('connectFailed')}</p>
+                )}
+                <button
+                  onClick={() => onMessage(profile)}
+                  className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-3.5 rounded-2xl font-semibold text-sm hover:bg-gray-200 transition-all min-h-[52px]"
+                >
+                  <MessageCircle className="w-4 h-4" /> {t('sendPrivateMessage')}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 /* ============ MESSAGES TAB ============ */
-function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall }) {
+function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall, onlineUsers = [], onOpenProfile }) {
   const { t, language } = useLanguage();
   const videoCallHint = useHint('chat_video_call');
   const voiceCallHint = useHint('chat_voice_call');
@@ -426,11 +640,16 @@ function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall
                     : 'border-transparent hover:bg-gray-50'
                 }`}
               >
-                <div className="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm flex-shrink-0 overflow-hidden">
-                  {thread.participantAvatar ? (
-                    <img src={thread.participantAvatar} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    thread.participantName?.[0]?.toUpperCase() || '?'
+                <div className="relative flex-shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm overflow-hidden">
+                    {thread.participantAvatar ? (
+                      <img src={thread.participantAvatar} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      thread.participantName?.[0]?.toUpperCase() || '?'
+                    )}
+                  </div>
+                  {onlineUsers.includes(thread.id) && (
+                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -454,16 +673,22 @@ function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall
             <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
               <div className="flex items-center gap-3">
                 <button onClick={() => setActiveThreadId(null)} className="md:hidden p-1"><X className="w-5 h-5" /></button>
-                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-sm overflow-hidden">
+                <button onClick={() => onOpenProfile?.(activeThread.id)} className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-sm overflow-hidden hover:opacity-80 transition">
                   {activeThread.participantAvatar ? (
                     <img src={activeThread.participantAvatar} alt="" className="w-full h-full object-cover" />
                   ) : activeThread.participantName?.[0]?.toUpperCase()}
-                </div>
+                </button>
                 <div>
                   <h3 className="font-bold text-gray-900">{activeThread.participantName}</h3>
-                  <p className="text-[10px] text-green-600 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full" /> Last seen: 5 minutes ago
-                  </p>
+                  {onlineUsers.includes(activeThread.id) ? (
+                    <p className="text-[10px] text-green-600 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full" /> {t('online')}
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-gray-400 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full" /> {t('offline')}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -669,13 +894,38 @@ function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall
 }
 
 /* ============ HOME TAB ============ */
-function HomeContent({ userName, userAvatar, currentUser }) {
+// Categories a post can belong to; also drive the feed filter chips.
+const POST_CATEGORIES = [
+  'Culture & Heritage', 'Traditions', 'History', 'Education', 'Technology',
+  'Career', 'Business', 'Finance', 'Health & Wellness', 'Sports', 'Travel',
+  'Music', 'Arts & Crafts', 'Community', 'Environment & Nature',
+];
+
+// Statuses live in the posts table with type='status' and disappear after 24h.
+const STATUS_TTL_MS = 24 * 60 * 60 * 1000;
+
+function HomeContent({ userName, userAvatar, currentUser, isNewUser = false, onStartRecording, onBrowseArchive, onOpenProfile }) {
+  const { t } = useLanguage();
   const firstName = userName?.split(' ')[0] || 'Friend';
   const [feed, setFeed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [composer, setComposer] = useState('');
   const [publishing, setPublishing] = useState(false);
+  const [category, setCategory] = useState(POST_CATEGORIES[0]);
+  const [photo, setPhoto] = useState(null); // data URL preview until published
+  const [feedFilter, setFeedFilter] = useState('All');
+  const [summary, setSummary] = useState(null); // { totalPoints, badges }
+  const [openCommentsId, setOpenCommentsId] = useState(null);
+  const [postingStatus, setPostingStatus] = useState(false);
+  const [statusViewer, setStatusViewer] = useState(null); // { group, index }
+  // Status composer: null | 'menu' | 'text' | 'voice'
+  const [statusComposer, setStatusComposer] = useState(null);
+  const [statusText, setStatusText] = useState('');
+  const [recordingStatus, setRecordingStatus] = useState(false);
+  const photoInputRef = useRef(null);
+  const statusInputRef = useRef(null);
+  const statusRecRef = useRef(null);
 
   const loadFeed = useCallback(async () => {
     setError(null);
@@ -692,20 +942,187 @@ function HomeContent({ userName, userAvatar, currentUser }) {
 
   useEffect(() => { loadFeed(); }, [loadFeed]);
 
+  // Root Points + badges for the welcome card.
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    getPointsSummary(currentUser.id).then(setSummary).catch(() => {});
+  }, [currentUser?.id]);
+
+  const handlePhotoSelect = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      // Compress before upload — full-size photos exceed server body limits (413).
+      setPhoto(await compressImage(file));
+    } catch (err) {
+      console.error('Could not process image:', err);
+      setError('Could not read that image. Try a different one.');
+    }
+  };
+
   const handlePublish = async () => {
     const body = composer.trim();
-    if (!body || publishing) return;
+    if ((!body && !photo) || publishing) return;
     setPublishing(true);
     try {
-      const data = await createPost(body);
+      let mediaUrl = null;
+      if (photo) {
+        const uploadResult = await uploadChatMedia(photo, 'image');
+        if (!uploadResult.success) throw new Error('Photo upload failed');
+        mediaUrl = uploadResult.url;
+      }
+      const data = await createPost(body || category, mediaUrl ? 'photo' : 'post', mediaUrl, category);
       if (data.post) setFeed((prev) => [data.post, ...prev]);
       setComposer('');
+      setPhoto(null);
     } catch (err) {
       console.error('Error publishing post:', err);
       setError('Could not publish your post. Please try again.');
     } finally {
       setPublishing(false);
     }
+  };
+
+  // Split the raw feed: statuses (last 24h, WhatsApp-style ring row) vs posts.
+  const now = Date.now();
+  const activeStatuses = feed.filter(
+    (p) => p.type === 'status' && now - new Date(p.created_at).getTime() < STATUS_TTL_MS
+  );
+  // Group statuses by author: [{ authorId, authorName, avatar, items[] }]
+  const statusGroups = Object.values(
+    activeStatuses.reduce((acc, s) => {
+      (acc[s.author_id] ||= {
+        authorId: s.author_id,
+        authorName: s.author_name,
+        avatar: s.avatar_url,
+        items: [],
+      }).items.push(s);
+      return acc;
+    }, {})
+  ).map((g) => ({ ...g, items: g.items.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)) }));
+  const myStatusGroup = statusGroups.find((g) => g.authorId === currentUser?.id);
+  const otherStatusGroups = statusGroups.filter((g) => g.authorId !== currentUser?.id);
+
+  const posts = feed.filter((p) => p.type !== 'status');
+  const visibleFeed = feedFilter === 'All' ? posts : posts.filter((p) => p.category === feedFilter);
+
+  // Optimistic like toggle: flip locally, reconcile with the server count.
+  const handleLike = async (post) => {
+    setFeed((prev) =>
+      prev.map((p) =>
+        p.id === post.id
+          ? { ...p, liked_by_me: !p.liked_by_me, like_count: (p.like_count || 0) + (p.liked_by_me ? -1 : 1) }
+          : p
+      )
+    );
+    try {
+      const data = await togglePostLike(post.id);
+      setFeed((prev) =>
+        prev.map((p) => (p.id === post.id ? { ...p, liked_by_me: data.liked, like_count: data.like_count } : p))
+      );
+    } catch {
+      // Revert on failure
+      setFeed((prev) =>
+        prev.map((p) =>
+          p.id === post.id
+            ? { ...p, liked_by_me: post.liked_by_me, like_count: post.like_count }
+            : p
+        )
+      );
+    }
+  };
+
+  // ---- 24h statuses. The post's `category` column carries the media kind
+  // ('image' | 'video' | 'audio' | 'text') so the viewer knows how to render.
+  const publishStatus = async (body, mediaUrl, kind) => {
+    setPostingStatus(true);
+    try {
+      const data = await createPost(body || 'Status', 'status', mediaUrl, kind);
+      if (data.post) setFeed((prev) => [data.post, ...prev]);
+    } catch (err) {
+      console.error('Error posting status:', err);
+      setError(t('statusFailed'));
+    } finally {
+      setPostingStatus(false);
+    }
+  };
+
+  // Photo or video status from a file.
+  const handleStatusFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || postingStatus) return;
+    setStatusComposer(null);
+    setPostingStatus(true);
+    try {
+      let dataUrl;
+      let kind;
+      if (file.type.startsWith('video/')) {
+        if (file.size > 15 * 1024 * 1024) {
+          setError(t('statusVideoTooBig'));
+          setPostingStatus(false);
+          return;
+        }
+        dataUrl = await fileToDataUrl(file);
+        kind = 'video';
+      } else {
+        dataUrl = await compressImage(file);
+        kind = 'image';
+      }
+      const uploadResult = await uploadChatMedia(dataUrl, kind);
+      if (!uploadResult.success) throw new Error('Upload failed');
+      await publishStatus('Status', uploadResult.url, kind);
+    } catch (err) {
+      console.error('Error posting status:', err);
+      setError(t('statusFailed'));
+      setPostingStatus(false);
+    }
+  };
+
+  const publishTextStatus = async () => {
+    const text = statusText.trim();
+    if (!text) return;
+    setStatusComposer(null);
+    setStatusText('');
+    await publishStatus(text, null, 'text');
+  };
+
+  const startVoiceStatus = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const rec = new MediaRecorder(stream);
+      const chunks = [];
+      rec.ondataavailable = (e) => chunks.push(e.data);
+      rec.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop());
+        try {
+          const blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+          const dataUrl = await blobToDataUrl(blob);
+          // Cloudinary stores audio under the 'video' resource type.
+          const uploadResult = await uploadChatMedia(dataUrl, 'video');
+          if (!uploadResult.success) throw new Error('Upload failed');
+          await publishStatus('Voice status', uploadResult.url, 'audio');
+        } catch (err) {
+          console.error('Error posting voice status:', err);
+          setError(t('statusFailed'));
+        }
+      };
+      rec.start();
+      statusRecRef.current = rec;
+      setRecordingStatus(true);
+      setStatusComposer('voice');
+    } catch {
+      setError(t('micDenied'));
+      setStatusComposer(null);
+    }
+  };
+
+  const stopVoiceStatus = () => {
+    statusRecRef.current?.stop();
+    statusRecRef.current = null;
+    setRecordingStatus(false);
+    setStatusComposer(null);
   };
 
   const timeAgo = (dateStr) => {
@@ -718,43 +1135,346 @@ function HomeContent({ userName, userAvatar, currentUser }) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 p-6 pt-4">
-      {/* Greeting */}
-      <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-full bg-brand-burgundy flex items-center justify-center text-white font-bold text-xl overflow-hidden flex-shrink-0">
-          {userAvatar ? <img src={userAvatar} alt={userName} className="w-full h-full object-cover" /> : firstName[0]?.toUpperCase()}
+    <div className="max-w-3xl mx-auto space-y-4 px-4 py-4 sm:space-y-6 sm:p-6 sm:pt-4">
+      {/* Status row — 24h statuses (photo, video, voice, text), WhatsApp style */}
+      <div className="flex gap-4 overflow-x-auto pb-1 -mx-1 px-1">
+        {/* My status: opens viewer if one exists; the + badge always composes */}
+        <div className="relative flex flex-col items-center gap-1.5 flex-shrink-0 w-16">
+          <button
+            onClick={() =>
+              myStatusGroup
+                ? setStatusViewer({ group: myStatusGroup, index: 0 })
+                : setStatusComposer('menu')
+            }
+            className="block"
+          >
+            <div className={`rounded-full p-[3px] ${myStatusGroup ? 'bg-gradient-to-tr from-brand-burgundy to-amber-500' : 'bg-gray-200'}`}>
+              <div className="w-14 h-14 rounded-full bg-white p-[2px]">
+                <div className="w-full h-full rounded-full bg-brand-burgundy/10 overflow-hidden flex items-center justify-center text-brand-burgundy font-bold">
+                  {postingStatus ? (
+                    <div className="w-5 h-5 border-2 border-brand-burgundy/30 border-t-brand-burgundy rounded-full animate-spin" />
+                  ) : userAvatar ? (
+                    <img src={userAvatar} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    firstName[0]?.toUpperCase()
+                  )}
+                </div>
+              </div>
+            </div>
+          </button>
+          <button
+            onClick={() => setStatusComposer('menu')}
+            aria-label={t('addStatus')}
+            className="absolute top-9 right-0 w-5 h-5 rounded-full bg-brand-burgundy text-white flex items-center justify-center border-2 border-white"
+          >
+            <Plus className="w-3 h-3" />
+          </button>
+          <span className="text-[11px] font-semibold text-gray-600 truncate w-full text-center">{t('myStatus')}</span>
         </div>
-        <div className="space-y-0.5">
-          <h1 className="text-3xl font-serif font-bold text-gray-900">{isNewUser ? 'Welcome' : 'Welcome back'}, {firstName}</h1>
-          <p className="text-gray-400 italic font-serif text-sm">"Wisdom is the reward you get for a lifetime of listening."</p>
+        <input ref={statusInputRef} type="file" accept="image/*,video/*" onChange={handleStatusFile} className="hidden" />
+
+        {otherStatusGroups.map((group) => (
+          <button
+            key={group.authorId}
+            onClick={() => setStatusViewer({ group, index: 0 })}
+            className="flex flex-col items-center gap-1.5 flex-shrink-0 w-16"
+          >
+            <div className="rounded-full p-[3px] bg-gradient-to-tr from-brand-burgundy to-amber-500">
+              <div className="w-14 h-14 rounded-full bg-white p-[2px]">
+                <div className="w-full h-full rounded-full bg-gray-200 overflow-hidden flex items-center justify-center text-gray-600 font-bold">
+                  {group.avatar ? (
+                    <img src={group.avatar} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    group.authorName?.[0]?.toUpperCase() || '?'
+                  )}
+                </div>
+              </div>
+            </div>
+            <span className="text-[11px] font-semibold text-gray-600 truncate w-full text-center">
+              {group.authorName?.split(' ')[0]}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Status composer — choose what kind of status to share */}
+      {statusComposer && (
+        <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" onClick={() => { if (!recordingStatus) { setStatusComposer(null); setStatusText(''); } }}>
+          <div className="bg-white rounded-3xl w-full max-w-xs shadow-2xl p-6 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+            {statusComposer === 'menu' && (
+              <>
+                <h3 className="text-lg font-serif font-bold text-gray-900 mb-4">{t('addStatus')}</h3>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => statusInputRef.current?.click()}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100 text-sm font-semibold text-gray-700 transition min-h-[52px]"
+                  >
+                    <span className="w-9 h-9 rounded-full bg-brand-burgundy/10 text-brand-burgundy flex items-center justify-center"><ImageIcon className="w-4 h-4" /></span>
+                    {t('statusPhotoVideo')}
+                  </button>
+                  <button
+                    onClick={startVoiceStatus}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100 text-sm font-semibold text-gray-700 transition min-h-[52px]"
+                  >
+                    <span className="w-9 h-9 rounded-full bg-brand-burgundy/10 text-brand-burgundy flex items-center justify-center"><Mic className="w-4 h-4" /></span>
+                    {t('statusVoice')}
+                  </button>
+                  <button
+                    onClick={() => setStatusComposer('text')}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100 text-sm font-semibold text-gray-700 transition min-h-[52px]"
+                  >
+                    <span className="w-9 h-9 rounded-full bg-brand-burgundy/10 text-brand-burgundy flex items-center justify-center font-serif font-bold">T</span>
+                    {t('statusText')}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {statusComposer === 'text' && (
+              <>
+                <h3 className="text-lg font-serif font-bold text-gray-900 mb-4">{t('statusText')}</h3>
+                <textarea
+                  value={statusText}
+                  onChange={(e) => setStatusText(e.target.value)}
+                  placeholder={t('statusTextPlaceholder')}
+                  rows={4}
+                  maxLength={280}
+                  autoFocus
+                  className="w-full resize-none rounded-2xl border border-gray-200 bg-[#FBF9F8] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-burgundy/20"
+                />
+                <button
+                  onClick={publishTextStatus}
+                  disabled={!statusText.trim()}
+                  className="mt-3 w-full bg-brand-burgundy text-white py-3 rounded-2xl font-semibold text-sm disabled:opacity-40 min-h-[48px]"
+                >
+                  {t('sharePost')}
+                </button>
+              </>
+            )}
+
+            {statusComposer === 'voice' && (
+              <div className="text-center py-2">
+                <div className="w-16 h-16 mx-auto rounded-full bg-red-500/10 flex items-center justify-center animate-pulse">
+                  <Mic className="w-7 h-7 text-red-500" />
+                </div>
+                <p className="mt-3 text-sm font-semibold text-gray-700">{t('recordingEllipsis')}</p>
+                <button
+                  onClick={stopVoiceStatus}
+                  className="mt-4 w-full flex items-center justify-center gap-2 bg-brand-burgundy text-white py-3 rounded-2xl font-semibold text-sm min-h-[48px]"
+                >
+                  <Square className="w-4 h-4" /> {t('stopAndShare')}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Welcome card */}
+      <div className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.15em] text-brand-burgundy">
+          {isNewUser ? t('welcomeNew') : t('welcomeBack')}
+        </p>
+        <h1 className="mt-1 text-3xl sm:text-4xl font-serif font-bold text-gray-900">{userName}</h1>
+        <p className="mt-3 text-sm sm:text-base text-gray-500 leading-relaxed max-w-2xl">
+          {t('homeBlurb')}
+        </p>
+        <div className="mt-5 pt-5 border-t border-gray-100 flex flex-wrap items-center gap-3">
+          <span className="inline-flex items-center gap-2 rounded-xl bg-amber-50 px-4 py-2.5 text-sm font-bold text-amber-700">
+            <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+            {summary?.totalPoints ?? currentUser?.root_points ?? 0} Root Points
+          </span>
+          {summary?.badges?.length ? (
+            <BadgeDisplay badges={summary.badges} />
+          ) : (
+            <span className="inline-flex items-center gap-2 rounded-xl bg-gray-50 px-4 py-2.5 text-sm font-semibold text-gray-500">
+              <Award className="w-4 h-4" />
+              {t('noBadgesYet')}
+            </span>
+          )}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button
+            onClick={onStartRecording}
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-burgundy px-6 py-3 text-sm font-bold text-white hover:bg-opacity-90 transition-all min-h-[48px]"
+          >
+            {t('startRecording')} <ArrowRight className="w-4 h-4" />
+          </button>
+          <button
+            onClick={onBrowseArchive}
+            className="inline-flex items-center rounded-xl bg-gray-100 px-6 py-3 text-sm font-bold text-gray-700 hover:bg-gray-200 transition-all min-h-[48px]"
+          >
+            {t('browseArchive')}
+          </button>
         </div>
       </div>
 
-      {/* Composer */}
-      <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-        <div className="flex gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold overflow-hidden flex-shrink-0">
-            {userAvatar ? <img src={userAvatar} alt="" className="w-full h-full object-cover" /> : firstName[0]?.toUpperCase()}
-          </div>
-          <div className="flex-1">
-            <textarea
-              value={composer}
-              onChange={(e) => setComposer(e.target.value)}
-              placeholder="Share a story, lesson, or reflection..."
-              rows={3}
-              className="w-full resize-none rounded-xl border border-gray-200 bg-[#FBF9F8] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-burgundy/20"
-            />
-            <div className="flex justify-end mt-2">
-              <button
-                onClick={handlePublish}
-                disabled={!composer.trim() || publishing}
-                className="bg-brand-burgundy text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-opacity-90 transition-all min-h-[44px] disabled:opacity-40"
-              >
-                {publishing ? 'Publishing...' : 'Publish'}
-              </button>
+      {/* Status viewer */}
+      {statusViewer && (
+        <div className="fixed inset-0 z-[95] bg-black/95 flex flex-col" onClick={() => setStatusViewer(null)}>
+          <div className="flex items-center gap-3 p-4 text-white" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => {
+                const authorId = statusViewer.group.authorId;
+                setStatusViewer(null);
+                onOpenProfile?.(authorId);
+              }}
+              className="flex items-center gap-3 flex-1 text-left hover:opacity-80 transition"
+            >
+              <div className="w-10 h-10 rounded-full bg-gray-600 overflow-hidden flex items-center justify-center font-bold">
+                {statusViewer.group.avatar ? (
+                  <img src={statusViewer.group.avatar} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  statusViewer.group.authorName?.[0]?.toUpperCase()
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-sm">{statusViewer.group.authorName}</p>
+                <p className="text-xs text-white/50">{timeAgo(statusViewer.group.items[statusViewer.index]?.created_at)}</p>
+              </div>
+            </button>
+            {/* Progress segments */}
+            <div className="absolute top-1.5 left-4 right-4 flex gap-1">
+              {statusViewer.group.items.map((_, i) => (
+                <div key={i} className={`h-0.5 flex-1 rounded-full ${i <= statusViewer.index ? 'bg-white' : 'bg-white/30'}`} />
+              ))}
             </div>
+            <button onClick={() => setStatusViewer(null)} aria-label="Close" className="p-2 text-white/70 hover:text-white">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <div className="flex-1 flex items-center justify-center relative px-2 pb-6" onClick={(e) => e.stopPropagation()}>
+            {statusViewer.index > 0 && (
+              <button
+                onClick={() => setStatusViewer((v) => ({ ...v, index: v.index - 1 }))}
+                className="absolute left-2 z-10 p-2 text-white/60 hover:text-white"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="w-8 h-8" />
+              </button>
+            )}
+            {(() => {
+              const item = statusViewer.group.items[statusViewer.index];
+              if (!item) return null;
+              if (item.category === 'text' || !item.media_url) {
+                return (
+                  <div className="max-w-md w-full rounded-3xl bg-gradient-to-br from-brand-burgundy to-[#3D0501] p-10 text-center">
+                    <p className="text-white text-xl font-serif leading-relaxed whitespace-pre-wrap">{item.body}</p>
+                  </div>
+                );
+              }
+              if (item.category === 'video') {
+                return <video key={item.id} src={item.media_url} controls autoPlay playsInline className="max-h-full max-w-full rounded-2xl" />;
+              }
+              if (item.category === 'audio') {
+                return (
+                  <div className="max-w-md w-full rounded-3xl bg-gradient-to-br from-brand-burgundy to-[#3D0501] p-10 text-center space-y-5">
+                    <Mic className="w-10 h-10 text-white/80 mx-auto" />
+                    <audio key={item.id} src={item.media_url} controls autoPlay className="w-full" />
+                  </div>
+                );
+              }
+              return <img src={item.media_url} alt="" className="max-h-full max-w-full rounded-2xl object-contain" />;
+            })()}
+            {statusViewer.index < statusViewer.group.items.length - 1 && (
+              <button
+                onClick={() => setStatusViewer((v) => ({ ...v, index: v.index + 1 }))}
+                className="absolute right-2 z-10 p-2 text-white/60 hover:text-white"
+                aria-label="Next"
+              >
+                <ChevronRight className="w-8 h-8" />
+              </button>
+            )}
           </div>
         </div>
+      )}
+
+      {/* Composer */}
+      <div className="bg-white border border-gray-100 rounded-3xl p-5 sm:p-6 shadow-sm">
+        <div className="flex gap-3">
+          <div className="w-10 h-10 rounded-full bg-brand-burgundy flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0">
+            {userAvatar ? <img src={userAvatar} alt="" className="w-full h-full object-cover" /> : firstName[0]?.toUpperCase()}
+          </div>
+          <textarea
+            value={composer}
+            onChange={(e) => setComposer(e.target.value)}
+            placeholder={t('composerPlaceholder')}
+            rows={3}
+            className="flex-1 resize-none rounded-xl border border-gray-200 bg-[#FBF9F8] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-burgundy/20"
+          />
+        </div>
+
+        {/* Category picker */}
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-2">{t('selectCategory')}</p>
+          <div className="flex flex-wrap gap-2">
+            {POST_CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setCategory(cat)}
+                className={`px-3.5 py-2 rounded-full text-xs font-bold transition-all ${
+                  category === cat
+                    ? 'bg-brand-burgundy text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Photo preview */}
+        {photo && (
+          <div className="mt-4 relative inline-block">
+            <img src={photo} alt="Attached" className="max-h-48 rounded-xl border border-gray-100" />
+            <button
+              type="button"
+              onClick={() => setPhoto(null)}
+              className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gray-900/80 text-white flex items-center justify-center hover:bg-gray-900"
+              aria-label="Remove photo"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => photoInputRef.current?.click()}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-brand-burgundy transition-colors min-h-[44px]"
+          >
+            <ImageIcon className="w-5 h-5" /> {t('photoVideo')}
+          </button>
+          <input ref={photoInputRef} type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
+          <button
+            onClick={handlePublish}
+            disabled={(!composer.trim() && !photo) || publishing}
+            className="bg-brand-burgundy text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-opacity-90 transition-all min-h-[44px] disabled:opacity-40"
+          >
+            {publishing ? t('publishing') : t('sharePost')}
+          </button>
+        </div>
+      </div>
+
+      {/* Feed filter */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        {['All', ...POST_CATEGORIES].map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => setFeedFilter(cat)}
+            className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all flex-shrink-0 ${
+              feedFilter === cat
+                ? 'bg-brand-burgundy text-white shadow-sm'
+                : 'bg-white border border-gray-200 text-gray-600 hover:border-brand-burgundy/40'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
       </div>
 
       {/* Feed */}
@@ -764,23 +1484,37 @@ function HomeContent({ userName, userAvatar, currentUser }) {
         </div>
       ) : error ? (
         <EmptyState icon={X} title="Couldn't load the feed" subtitle={error} action={{ label: 'Try again', onClick: loadFeed }} />
-      ) : feed.length === 0 ? (
-        <EmptyState icon={BookOpen} title="No stories yet" subtitle="Be the first to share a story or lesson with the community using the box above." />
+      ) : visibleFeed.length === 0 ? (
+        <EmptyState icon={BookOpen} title={feedFilter === 'All' ? 'No stories yet' : `Nothing in ${feedFilter} yet`} subtitle="Be the first to share a story or lesson with the community using the box above." />
       ) : (
         <div className="space-y-4">
-          {feed.map((post) => {
+          {visibleFeed.map((post) => {
             const isMine = post.author_id === currentUser?.id;
             return (
               <article key={post.id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <Avatar name={post.author_name} avatar={post.avatar_url} size="w-10 h-10" />
-                  <div className="min-w-0">
-                    <p className="font-bold text-gray-900 text-sm truncate">
-                      {post.author_name || 'Community member'}{isMine && <span className="text-gray-400 font-normal"> · You</span>}
-                    </p>
-                    <p className="text-[11px] text-gray-400">
-                      {post.identity || 'Member'} · {timeAgo(post.created_at)}
-                    </p>
+                  <button onClick={() => onOpenProfile?.(post.author_id)} className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-80 transition">
+                    <Avatar name={post.author_name} avatar={post.avatar_url} size="w-10 h-10" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-gray-900 text-sm truncate">
+                        {post.author_name || 'Community member'}{isMine && <span className="text-gray-400 font-normal"> · You</span>}
+                      </p>
+                      <p className="text-[11px] text-gray-400">
+                        {post.identity || 'Member'} · {timeAgo(post.created_at)}
+                      </p>
+                    </div>
+                  </button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {post.media_url && post.type !== 'audio_archive' && post.type !== 'voice' && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+                        <ImageIcon className="w-3 h-3" /> Photo
+                      </span>
+                    )}
+                    {post.category && (
+                      <span className="rounded-full bg-brand-burgundy/5 px-2.5 py-1 text-[10px] font-bold text-brand-burgundy">
+                        {post.category}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <p className="text-sm text-gray-700 font-serif leading-relaxed whitespace-pre-wrap mt-3">{post.body || post.title}</p>
@@ -793,6 +1527,34 @@ function HomeContent({ userName, userAvatar, currentUser }) {
                     )}
                   </div>
                 )}
+
+                {/* Post actions */}
+                <div className="mt-4 pt-3 border-t border-gray-50 flex items-center gap-5">
+                  <button
+                    onClick={() => handleLike(post)}
+                    className={`flex items-center gap-1.5 text-sm font-semibold transition-colors min-h-[36px] ${
+                      post.liked_by_me ? 'text-red-500' : 'text-gray-400 hover:text-red-400'
+                    }`}
+                  >
+                    <Heart className={`w-[18px] h-[18px] ${post.liked_by_me ? 'fill-red-500' : ''}`} />
+                    {post.like_count || 0}
+                  </button>
+                  <button
+                    onClick={() => setOpenCommentsId((id) => (id === post.id ? null : post.id))}
+                    className={`flex items-center gap-1.5 text-sm font-semibold transition-colors min-h-[36px] ${
+                      openCommentsId === post.id ? 'text-brand-burgundy' : 'text-gray-400 hover:text-brand-burgundy'
+                    }`}
+                  >
+                    <MessageCircle className="w-[18px] h-[18px]" />
+                    {t('comment')}
+                  </button>
+                </div>
+
+                {openCommentsId === post.id && (
+                  <div className="mt-3 border-t border-gray-50 pt-3">
+                    <CommentsSection contentType="post" contentId={post.id} contentAuthor={post.author_name} />
+                  </div>
+                )}
               </article>
             );
           })}
@@ -803,8 +1565,8 @@ function HomeContent({ userName, userAvatar, currentUser }) {
 }
 
 /* ============ THE ARCHIVE TAB (Wisdom Hub) ============ */
-function ArchiveContent({ onCreateStory, onCreateArticle }) {
-  const [activeTab, setActiveTab] = useState('stories'); // stories | library
+function ArchiveContent({ onCreateStory, onCreateArticle, onRecord }) {
+  const [activeTab, setActiveTab] = useState('stories'); // stories | oral | library
   const [stories, setStories] = useState([]);
   const [library, setLibrary] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -851,7 +1613,13 @@ function ArchiveContent({ onCreateStory, onCreateArticle }) {
     (a.excerpt?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
-  const content = activeTab === 'stories' ? filteredStories : filteredLibrary;
+  // Oral archive: stories that carry an audio recording (voice memoirs).
+  const filteredOral = filteredStories.filter(
+    (s) => s.media_url && (s.type === 'audio_archive' || /\.(webm|ogg|mp3|wav|m4a|aac)(\?|#|$)/i.test(s.media_url))
+  );
+
+  const content =
+    activeTab === 'stories' ? filteredStories : activeTab === 'oral' ? filteredOral : filteredLibrary;
 
   if (selectedPost) {
     const contentType = selectedPost.type === 'audio_archive' || selectedPost.type === 'story' ? 'story' : 'article';
@@ -865,10 +1633,10 @@ function ArchiveContent({ onCreateStory, onCreateArticle }) {
         <div className="flex items-center justify-between gap-3 mb-4">
           <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">Wisdom Hub</h2>
           <button
-            onClick={activeTab === 'stories' ? onCreateStory : onCreateArticle}
+            onClick={activeTab === 'stories' ? onCreateStory : activeTab === 'oral' ? onRecord : onCreateArticle}
             className="px-4 md:px-5 py-2.5 md:py-2 rounded-xl text-sm md:text-base font-semibold bg-brand-burgundy text-white hover:bg-opacity-90 transition-all min-h-[44px] md:min-h-auto whitespace-nowrap"
           >
-            + {activeTab === 'stories' ? 'Story' : 'Article'}
+            + {activeTab === 'stories' ? 'Story' : activeTab === 'oral' ? t('record') : 'Article'}
           </button>
         </div>
 
@@ -882,6 +1650,16 @@ function ArchiveContent({ onCreateStory, onCreateArticle }) {
             }`}
           >
             <BookOpen className="w-4 h-4" strokeWidth={1.75} /> Stories
+          </button>
+          <button
+            onClick={() => {setActiveTab('oral'); setSearchTerm('');}}
+            className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] ${
+              activeTab === 'oral'
+                ? 'bg-brand-burgundy text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            <Mic className="w-4 h-4" strokeWidth={1.75} /> {t('oralArchive')}
           </button>
           <button
             onClick={() => {setActiveTab('library'); setSearchTerm('');}}
@@ -938,7 +1716,30 @@ function ArchiveContent({ onCreateStory, onCreateArticle }) {
         </div>
       ) : (
         <div className="md:p-6 p-4 pt-2 md:pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {content.map((item) => (
+          {activeTab === 'oral'
+            ? content.map((item) => (
+                <div
+                  key={item.id || item._id}
+                  className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 flex flex-col"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-[#FBF1F0] flex items-center justify-center text-brand-burgundy flex-shrink-0">
+                      <Mic className="w-6 h-6" strokeWidth={1.75} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{item.display_name}</p>
+                      {item.category && <p className="text-xs text-gray-500">{item.category}</p>}
+                    </div>
+                  </div>
+                  {item.body && (
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed font-serif italic">
+                      "{item.body.substring(0, 140)}"
+                    </p>
+                  )}
+                  <audio src={item.media_url} controls preload="none" className="w-full mt-auto" />
+                </div>
+              ))
+            : content.map((item) => (
             <button
               key={item.id || item._id}
               onClick={() => setSelectedPost(item)}
@@ -953,12 +1754,12 @@ function ArchiveContent({ onCreateStory, onCreateArticle }) {
 
               {/* Title */}
               <h3 className="text-lg md:text-xl font-serif font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-brand-burgundy transition-colors">
-                {activeTab === 'stories' ? item.body.substring(0, 100) : item.title}
+                {activeTab === 'stories' ? (item.body || '').substring(0, 100) : item.title}
               </h3>
 
               {/* Excerpt */}
               <p className="text-sm md:text-base text-gray-600 mb-4 flex-1 line-clamp-3 leading-relaxed">
-                {activeTab === 'stories' ? item.body.substring(100, 200) : item.excerpt}
+                {activeTab === 'stories' ? (item.body || '').substring(100, 200) : item.excerpt}
               </p>
 
               {/* Author */}
@@ -1066,7 +1867,7 @@ function PostDetail({ post, contentType = 'story', onBack }) {
 }
 
 /* ============ SETTINGS TAB ============ */
-function SettingsContent({ userName, userEmail, appUser, onLogout, language, changeLanguage, auth }) {
+function SettingsContent({ userName, userEmail, appUser, onLogout, language, changeLanguage, auth, darkMode = false, onToggleDark }) {
   const [settingsTab, setSettingsTab] = useState('profile'); // profile | moderation
   const [profile, setProfile] = useState({
     displayName: userName || '',
@@ -1203,6 +2004,17 @@ function SettingsContent({ userName, userEmail, appUser, onLogout, language, cha
               <option value="fr">Français</option>
             </select>
           </div>
+          {/* Dark theme — reachable on mobile where the sidebar toggle isn't */}
+          <div className="flex items-center justify-between py-4 border-b border-gray-200">
+            <div>
+              <p className="font-medium text-gray-900">Dark theme</p>
+              <p className="text-sm text-gray-500">Easier on the eyes at night</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" checked={darkMode} onChange={onToggleDark} className="sr-only peer" />
+              <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-burgundy"></div>
+            </label>
+          </div>
           {[
             { label: 'Email notifications', desc: 'Get updates on new matches and messages' },
             { label: 'Public profile', desc: 'Let others see your profile' },
@@ -1237,7 +2049,7 @@ function SettingsContent({ userName, userEmail, appUser, onLogout, language, cha
 }
 
 /* ============ MENTORSHIP TAB ============ */
-function MentorshipContent({ currentUser, onOpenChat, onStartCall }) {
+function MentorshipContent({ currentUser, onOpenChat, onStartCall, onlineUsers = [], onOpenProfile }) {
   const connectHint = useHint('mentorship_request_session');
   const myCircleVideoHint = useHint('mycircle_video_call');
   const myCircleMessageHint = useHint('mycircle_message');
@@ -1298,10 +2110,10 @@ function MentorshipContent({ currentUser, onOpenChat, onStartCall }) {
     return () => { cancelled = true; };
   }, [filter, reloadKey]);
 
-  const handleRequest = async (userId) => {
+  const handleRequest = async (userId, message = null) => {
     setRequestedIds((prev) => new Set(prev).add(userId));
     try {
-      await requestConnection(userId);
+      await requestConnection(userId, message);
     } catch (err) {
       console.error('Error requesting connection:', err);
       // Roll back the optimistic update on failure
@@ -1434,7 +2246,8 @@ function MentorshipContent({ currentUser, onOpenChat, onStartCall }) {
                   key={person.id}
                   person={person}
                   requested={requestedIds.has(person.id)}
-                  onRequest={() => handleRequest(person.id)}
+                  onRequest={(message) => handleRequest(person.id, message)}
+                  onOpenProfile={onOpenProfile}
                 />
               ))}
             </div>
@@ -1489,7 +2302,12 @@ function MentorshipContent({ currentUser, onOpenChat, onStartCall }) {
             <div className="grid sm:grid-cols-2 gap-4">
               {connections.map((conn) => (
                 <div key={conn.connection_id} className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
-                  <Avatar name={conn.display_name} avatar={conn.avatar_url} />
+                  <button onClick={() => onOpenProfile?.(conn.connected_user_id)} className="relative flex-shrink-0 hover:opacity-80 transition">
+                    <Avatar name={conn.display_name} avatar={conn.avatar_url} />
+                    {onlineUsers.includes(conn.connected_user_id) && (
+                      <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white" />
+                    )}
+                  </button>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-gray-900 truncate">{conn.display_name}</p>
                     <p className="text-xs text-brand-burgundy font-semibold uppercase tracking-wide">{conn.identity}</p>
@@ -1538,8 +2356,13 @@ function MentorshipContent({ currentUser, onOpenChat, onStartCall }) {
   );
 }
 
-function PersonCard({ person, requested, onRequest }) {
+function PersonCard({ person, requested, onRequest, onOpenProfile }) {
+  const { t } = useLanguage();
   const requestHint = useHint('mentorship_request_session');
+  // Two-step request: first click reveals the "why do you want to connect"
+  // note, second click sends it along with the request.
+  const [composing, setComposing] = useState(false);
+  const [note, setNote] = useState('');
   const interests = [
     ...(person.share_interests || []),
     ...(person.learn_interests || []),
@@ -1547,10 +2370,19 @@ function PersonCard({ person, requested, onRequest }) {
     ...(person.they_can_learn || []),
   ].filter(Boolean).slice(0, 3);
 
+  const sendRequest = () => {
+    requestHint.recordUse();
+    onRequest(note.trim() || null);
+    setComposing(false);
+    setNote('');
+  };
+
   return (
     <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex flex-col">
       <div className="flex items-start gap-3">
-        <Avatar name={person.display_name} avatar={person.avatar_url} size="w-14 h-14" />
+        <button onClick={() => onOpenProfile?.(person.id)} className="hover:opacity-80 transition flex-shrink-0">
+          <Avatar name={person.display_name} avatar={person.avatar_url} size="w-14 h-14" />
+        </button>
         <div className="flex-1 min-w-0">
           <p className="font-bold text-gray-900 truncate">{person.display_name}</p>
           <p className="text-xs text-brand-burgundy font-semibold uppercase tracking-wide">
@@ -1564,32 +2396,66 @@ function PersonCard({ person, requested, onRequest }) {
         </div>
       </div>
 
-      {person.bio && <p className="text-sm text-gray-500 mt-3 leading-relaxed line-clamp-2">{person.bio}</p>}
+      {person.bio && <p className="text-sm text-gray-500 mt-3 leading-relaxed line-clamp-2 italic">"{person.bio}"</p>}
 
-      {interests.length > 0 && (
+      {person.language && (
         <div className="flex flex-wrap gap-1.5 mt-3">
-          {interests.map((tag, i) => (
-            <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg">{tag}</span>
-          ))}
+          <span className="inline-flex items-center gap-1 text-xs border border-gray-200 text-gray-600 px-2.5 py-1 rounded-full font-semibold">
+            <Globe className="w-3 h-3" /> {LANGUAGE_LABELS[person.language] || person.language}
+          </span>
         </div>
       )}
 
-      <div className="relative mt-4">
+      {interests.length > 0 && (
+        <div className="mt-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">{t('interestsTopics')}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {interests.map((tag, i) => (
+              <span key={i} className="text-xs border border-brand-burgundy/25 text-brand-burgundy px-2.5 py-1 rounded-lg font-semibold capitalize">{tag}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {composing && !requested && (
+        <div className="mt-4">
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={t('whyConnectPlaceholder')}
+            rows={2}
+            maxLength={200}
+            autoFocus
+            className="w-full resize-none rounded-xl border border-gray-200 bg-[#FBF9F8] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-burgundy/20"
+          />
+        </div>
+      )}
+
+      <div className="relative mt-4 flex gap-2">
+        {composing && !requested && (
+          <button
+            onClick={() => { setComposing(false); setNote(''); }}
+            className="px-4 py-2.5 rounded-xl font-semibold text-sm text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all min-h-[44px]"
+          >
+            {t('cancel')}
+          </button>
+        )}
         <button
-          onClick={() => {
-            requestHint.recordUse();
-            onRequest();
-          }}
+          onClick={() => (composing ? sendRequest() : setComposing(true))}
           disabled={requested}
-          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm transition-all min-h-[44px] ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm transition-all min-h-[44px] ${
             requested
               ? 'bg-gray-100 text-gray-400 cursor-default'
               : 'bg-brand-burgundy text-white hover:bg-opacity-90'
           }`}
         >
-          {requested ? <><Check className="w-4 h-4" /> Request sent</> : <><UserPlus className="w-4 h-4" /> Request session</>}
+          {requested
+            ? <><Check className="w-4 h-4" /> {t('requestSent')}</>
+            : composing
+              ? <><Send className="w-4 h-4" /> {t('sendRequest')}</>
+              : <><UserPlus className="w-4 h-4" /> {t('requestSession')}</>}
         </button>
-        {!requested && <HintTooltip show={requestHint.showHint} text="Send a mentorship request" position="above" />}
+        {!requested && !composing && <HintTooltip show={requestHint.showHint} text="Send a mentorship request" position="above" />}
       </div>
     </div>
   );

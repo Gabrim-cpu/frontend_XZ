@@ -21,13 +21,30 @@ export const getFeed = async () => {
   return response.json();
 };
 
-export const createPost = async (body, type = 'post', mediaUrl = null) => {
+export const createPost = async (body, type = 'post', mediaUrl = null, category = null) => {
   const response = await fetch(`${API_URL}/feed`, {
     method: 'POST',
     headers: await getHeaders(),
-    body: JSON.stringify({ body, type, media_url: mediaUrl })
+    body: JSON.stringify({ body, type, media_url: mediaUrl, category })
   });
   if (!response.ok) throw new Error('Failed to create post');
+  return response.json();
+};
+
+export const togglePostLike = async (postId) => {
+  const response = await fetch(`${API_URL}/feed/${postId}/like`, {
+    method: 'POST',
+    headers: await getHeaders()
+  });
+  if (!response.ok) throw new Error('Failed to like post');
+  return response.json();
+};
+
+export const getPublicProfile = async (userId) => {
+  const response = await fetch(`${API_URL}/auth/users/${userId}`, {
+    headers: await getHeaders()
+  });
+  if (!response.ok) throw new Error('Failed to fetch profile');
   return response.json();
 };
 
@@ -59,11 +76,11 @@ export const getAllUsers = async (identity = null) => {
   return response.json();
 };
 
-export const requestConnection = async (receiverId) => {
+export const requestConnection = async (receiverId, message = null) => {
   const response = await fetch(`${API_URL}/connections/request`, {
     method: 'POST',
     headers: await getHeaders(),
-    body: JSON.stringify({ receiverId })
+    body: JSON.stringify({ receiverId, message })
   });
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
@@ -211,11 +228,11 @@ export const getLibrary = async () => {
   return response.json();
 };
 
-export const createLibraryArticle = async (title, content, excerpt = null, category = null, tags = []) => {
+export const createLibraryArticle = async (title, content, excerpt = null, category = null, tags = [], mediaUrl = null) => {
   const response = await fetch(`${API_URL}/content/library`, {
     method: 'POST',
     headers: await getHeaders(),
-    body: JSON.stringify({ title, content, excerpt, category, tags })
+    body: JSON.stringify({ title, content, excerpt, category, tags, media_url: mediaUrl })
   });
   if (!response.ok) throw new Error('Failed to create article');
   return response.json();

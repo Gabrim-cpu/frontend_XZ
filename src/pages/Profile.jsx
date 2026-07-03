@@ -2,7 +2,8 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile } from '../services/authService';
-import { Upload, X, Check, ArrowRight, BookOpen, Users } from 'lucide-react';
+import { Upload, X, Check, ArrowRight } from 'lucide-react';
+import { compressImage } from '../utils/imageUtils';
 import logoXZ from '../Assets/logo_XZ-removebg-preview.png';
 
 const nicheFields = ['history', 'sociology', 'anthropology', 'literature', 'philosophy', 'technology', 'arts', 'music', 'cooking', 'crafts'];
@@ -12,33 +13,39 @@ export default function Profile() {
   const { appUser, refreshUser } = useAuth();
   const fileInputRef = useRef(null);
 
-  const [identity, setIdentity] = useState(appUser?.identity || 'Senior');
   const [displayName, setDisplayName] = useState(appUser?.display_name || '');
   const [age, setAge] = useState(appUser?.age || '');
   const [bio, setBio] = useState(appUser?.bio || '');
   const [profilePhoto, setProfilePhoto] = useState(appUser?.avatar_url || null);
   const [profilePhotoFile, setProfilePhotoFile] = useState(null);
-  const [learnInterests, setLearnInterests] = useState(appUser?.learn_interests || []);
-  const [shareInterests, setShareInterests] = useState(appUser?.share_interests || []);
+  // One global interest list — matching uses it for both what you can share
+  // and what you want to learn, so the app pairs people automatically.
+  const [interests, setInterests] = useState(() => {
+    const merged = [...(appUser?.share_interests || []), ...(appUser?.learn_interests || [])];
+    return [...new Set(merged)];
+  });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const isSenior = identity === 'Senior';
+  // Age decides the identity automatically: 50 and above join as Seniors.
+  const parsedAge = parseInt(age, 10);
+  const identity = Number.isNaN(parsedAge) ? null : parsedAge >= 50 ? 'Senior' : 'Youth';
 
-  const toggleInterest = (interest, type) => {
-    const setter = type === 'learn' ? setLearnInterests : setShareInterests;
-    setter(prev => prev.includes(interest) ? prev.filter(i => i !== interest) : [...prev, interest]);
+  const toggleInterest = (interest) => {
+    setInterests(prev => prev.includes(interest) ? prev.filter(i => i !== interest) : [...prev, interest]);
   };
 
-  const handlePhotoSelect = (e) => {
+  const handlePhotoSelect = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        setProfilePhoto(evt.target?.result);
+      try {
+        // Compress before saving — the avatar travels as base64 in the profile
+        // update, and full-size photos exceed server body limits (413).
+        setProfilePhoto(await compressImage(file, { maxDim: 512 }));
         setProfilePhotoFile(file);
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        setError('Could not read that image. Try a different one.');
+      }
     }
   };
 
@@ -53,17 +60,23 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!identity) {
+      setError('Please enter your age');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       await updateProfile({
         identity,
         display_name: displayName || undefined,
-        age: age ? parseInt(age, 10) : undefined,
+        age: parsedAge,
         bio: bio || undefined,
         avatar_url: profilePhoto || undefined,
-        learn_interests: learnInterests,
-        share_interests: shareInterests,
+        learn_interests: interests,
+        share_interests: interests,
       });
       await refreshUser?.();
       navigate('/dashboard');
@@ -137,28 +150,6 @@ export default function Profile() {
               />
             </div>
 
-            {/* Identity */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">I am a</label>
-              <div className="grid grid-cols-2 gap-3">
-                {['Senior', 'Youth'].map((role) => (
-                  <button
-                    key={role}
-                    type="button"
-                    onClick={() => setIdentity(role)}
-                    className={`py-4 px-4 rounded-2xl border flex items-center justify-center gap-2 font-semibold text-base min-h-[56px] transition-all ${
-                      identity === role
-                        ? 'border-brand-burgundy bg-brand-burgundy text-white shadow-md'
-                        : 'border-gray-200 text-gray-500 hover:border-brand-burgundy/40'
-                    }`}
-                  >
-                    {role === 'Senior' ? <BookOpen className="w-5 h-5" /> : <Users className="w-5 h-5" />}
-                    {role}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Display Name */}
             <div>
               <label htmlFor="displayName" className="text-xs font-bold text-gray-400 uppercase tracking-wider">Display Name</label>
@@ -171,18 +162,34 @@ export default function Profile() {
               />
             </div>
 
-            {/* Age */}
-            <div>
-              <label htmlFor="age" className="text-xs font-bold text-gray-400 uppercase tracking-wider">Age</label>
-              <input
-                id="age"
-                type="number"
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-                placeholder="e.g. 24 or 65"
-                className="w-full mt-1.5 px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-base min-h-[52px] focus:outline-none focus:ring-2 focus:ring-brand-burgundy/30 focus:border-brand-burgundy"
-              />
-            </div>
+            {/* Age — decides Youth/Senior automatically. Only asked here if it
+                wasn't provided at signup; otherwise just show the result. */}
+            {appUser?.age ? (
+              identity && (
+                <span className="inline-block text-xs font-bold text-brand-burgundy bg-brand-burgundy/5 rounded-full px-3 py-1.5">
+                  {identity === 'Senior' ? 'Senior' : 'Youth'} · {age} years
+                </span>
+              )
+            ) : (
+              <div>
+                <div className="flex items-center justify-between">
+                  <label htmlFor="age" className="text-xs font-bold text-gray-400 uppercase tracking-wider">Age</label>
+                  {identity && (
+                    <span className="text-xs font-bold text-brand-burgundy bg-brand-burgundy/5 rounded-full px-3 py-1">
+                      You're joining as a {identity}
+                    </span>
+                  )}
+                </div>
+                <input
+                  id="age"
+                  type="number"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  placeholder="e.g. 24 or 65"
+                  className="w-full mt-1.5 px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-base min-h-[52px] focus:outline-none focus:ring-2 focus:ring-brand-burgundy/30 focus:border-brand-burgundy"
+                />
+              </div>
+            )}
 
             {/* Bio */}
             <div>
@@ -197,40 +204,18 @@ export default function Profile() {
               />
             </div>
 
-            {/* Interests - Share */}
+            {/* Interests — one list; the app matches you automatically */}
             <div>
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">I can teach or share</label>
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Your interests</label>
+              <p className="text-xs text-gray-400 mt-1">Pick what you're interested in — we'll automatically match you with people across generations who share them.</p>
               <div className="flex flex-wrap gap-2 mt-3">
                 {nicheFields.map((field) => {
-                  const active = shareInterests.includes(field);
+                  const active = interests.includes(field);
                   return (
                     <button
                       key={field}
                       type="button"
-                      onClick={() => toggleInterest(field, 'share')}
-                      className={`px-4 py-2.5 rounded-full font-semibold flex items-center gap-1.5 transition min-h-[44px] text-sm ${
-                        active ? 'bg-brand-burgundy text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {active && <Check className="h-4 w-4" />}
-                      {field.charAt(0).toUpperCase() + field.slice(1)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Interests - Learn */}
-            <div>
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">I want to learn</label>
-              <div className="flex flex-wrap gap-2 mt-3">
-                {nicheFields.map((field) => {
-                  const active = learnInterests.includes(field);
-                  return (
-                    <button
-                      key={field}
-                      type="button"
-                      onClick={() => toggleInterest(field, 'learn')}
+                      onClick={() => toggleInterest(field)}
                       className={`px-4 py-2.5 rounded-full font-semibold flex items-center gap-1.5 transition min-h-[44px] text-sm ${
                         active ? 'bg-brand-burgundy text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}

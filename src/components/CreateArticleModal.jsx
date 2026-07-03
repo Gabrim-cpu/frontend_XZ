@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { X, AlertCircle, Info } from 'lucide-react';
-import { createLibraryArticle } from '../services/apiService';
+import React, { useState, useRef } from 'react';
+import { X, AlertCircle, Info, Image as ImageIcon } from 'lucide-react';
+import { createLibraryArticle, uploadChatMedia } from '../services/apiService';
+import { compressImage } from '../utils/imageUtils';
 
 const CATEGORIES = ['General', 'Philosophy', 'Career', 'Relationships', 'Health', 'Resilience'];
 
@@ -14,10 +15,24 @@ export default function CreateArticleModal({ isOpen, onClose, onSuccess }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [cover, setCover] = useState(null); // compressed data URL
+  const coverRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCoverSelect = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      setCover(await compressImage(file));
+      setError(null);
+    } catch {
+      setError('Could not read that image. Try a different one.');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -35,15 +50,24 @@ export default function CreateArticleModal({ isOpen, onClose, onSuccess }) {
         .map(t => t.trim())
         .filter(t => t);
 
+      let mediaUrl = null;
+      if (cover) {
+        const uploadResult = await uploadChatMedia(cover, 'image');
+        if (!uploadResult.success) throw new Error('Cover upload failed');
+        mediaUrl = uploadResult.url;
+      }
+
       await createLibraryArticle(
         formData.title,
         formData.content,
         formData.excerpt || formData.content.substring(0, 150),
         formData.category,
-        tags
+        tags,
+        mediaUrl
       );
 
       setFormData({ title: '', excerpt: '', content: '', category: 'General', tags: '' });
+      setCover(null);
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -137,6 +161,35 @@ export default function CreateArticleModal({ isOpen, onClose, onSuccess }) {
                 className="w-full px-4 py-2.5 md:py-3 bg-gray-50 border border-gray-200 rounded-xl text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-brand-burgundy/20 min-h-[48px] md:min-h-auto"
               />
             </div>
+          </div>
+
+          {/* Cover image */}
+          <div>
+            <label className="block text-sm md:text-base font-semibold text-gray-900 mb-2">
+              Cover image (optional)
+            </label>
+            {cover ? (
+              <div className="relative inline-block">
+                <img src={cover} alt="Cover" className="max-h-40 rounded-xl border border-gray-100" />
+                <button
+                  type="button"
+                  onClick={() => setCover(null)}
+                  className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gray-900/80 text-white flex items-center justify-center hover:bg-gray-900"
+                  aria-label="Remove cover"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => coverRef.current?.click()}
+                className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-gray-300 text-sm font-semibold text-gray-500 hover:border-brand-burgundy/50 hover:text-brand-burgundy transition min-h-[48px]"
+              >
+                <ImageIcon className="w-4 h-4" /> Add cover image
+              </button>
+            )}
+            <input ref={coverRef} type="file" accept="image/*" onChange={handleCoverSelect} className="hidden" />
           </div>
 
           {/* Info */}
