@@ -11,6 +11,7 @@ body {
     background-color: #FBF9F6;
     color: #740A03;
     font-family: 'Poppins', sans-serif;
+<<<<<<< HEAD
     font-size: 15px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -54,6 +55,10 @@ h1.font-serif, h2.font-serif { letter-spacing: -0.02em; }
 .xz-ripple { animation: xz-ripple 1.6s ease-out infinite; }
 .dark .xz-loader-bg { background-color: #14100E; }
 
+=======
+}
+
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
 /* ---------- Dark theme ----------
    Toggled by adding .dark to <html>. Instead of sprinkling dark: variants on
    every element, we remap the light-theme utility palette to warm dark tones.
@@ -100,7 +105,10 @@ h1.font-serif, h2.font-serif { letter-spacing: -0.02em; }
 .dark .bg-\[\#FDFBF9\] { background-color: #1B1512; }
 .dark .bg-white\/80 { background-color: rgba(32, 25, 21, 0.85); }
 .dark .bg-white\/60 { background-color: rgba(32, 25, 21, 0.6); }
+<<<<<<< HEAD
 .dark .bg-white\/90 { background-color: rgba(32, 25, 21, 0.92); }
+=======
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
 
 /* Stone palette (used by chat, dashboard, badges) */
 .dark .text-stone-400 { color: #877A72; }
@@ -125,5 +133,9 @@ h1.font-serif, h2.font-serif { letter-spacing: -0.02em; }
 .dark .text-emerald-600 { color: #34D399; }
 .dark .text-amber-700 { color: #FBBF24; }
 .dark .text-red-700 { color: #F87171; }
+<<<<<<< HEAD
 .dark .border-red-200 { border-color: rgba(239, 68, 68, 0.35); }
 .dark .ring-offset-2 { --tw-ring-offset-color: #201915; }
+=======
+.dark .border-red-200 { border-color: rgba(239, 68, 68, 0.35); }
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
