@@ -177,7 +177,6 @@ const translations = {
     sendRequest: 'Send request',
     requestSession: 'Request session',
     connectFailed: 'Could not send the request. Try again.',
-<<<<<<< HEAD
     conversations: 'Conversations',
     searchConversations: 'Search a name or message...',
     noSearchResults: 'Nothing found',
@@ -190,8 +189,6 @@ const translations = {
     languageDesc: 'Choose your preferred language',
     darkThemeDesc: 'Easier on the eyes at night',
     saveChanges: 'Save Changes',
-=======
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
   },
   fr: {
     // Auth & Register
@@ -365,7 +362,6 @@ const translations = {
     sendRequest: 'Envoyer la demande',
     requestSession: 'Demander une session',
     connectFailed: "Impossible d'envoyer la demande. Réessayez.",
-<<<<<<< HEAD
     conversations: 'Conversations',
     searchConversations: 'Rechercher un nom ou un message...',
     noSearchResults: 'Aucun résultat',
@@ -378,8 +374,6 @@ const translations = {
     languageDesc: 'Choisissez votre langue préférée',
     darkThemeDesc: 'Plus doux pour les yeux la nuit',
     saveChanges: 'Enregistrer',
-=======
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
   }
 };
 

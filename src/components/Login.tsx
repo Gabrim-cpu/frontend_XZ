@@ -148,13 +148,8 @@ export default function Login() {
         {/* Mobile logo header */}
         <div className="lg:hidden flex items-center justify-center pt-8 pb-2">
           <button onClick={() => navigate('/')} className="flex items-center gap-2">
-<<<<<<< HEAD
             <img src={logoXZ} alt="XZ" className="w-16 h-16" />
             <span className="text-base font-extrabold text-brand-burgundy">XZ</span>
-=======
-            <img src={logoXZ} alt="XZ" className="w-11 h-11" />
-            <span className="text-sm font-bold text-brand-burgundy">XZ</span>
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
           </button>
         </div>
 
@@ -244,11 +239,7 @@ export default function Login() {
                     Entering...
                   </>
                 ) : (
-<<<<<<< HEAD
                   <>Continue to Digital Roots <ArrowRight className="w-5 h-5" /></>
-=======
-                  <>Sign In <ArrowRight className="w-5 h-5" /></>
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
                 )}
               </button>
             </form>

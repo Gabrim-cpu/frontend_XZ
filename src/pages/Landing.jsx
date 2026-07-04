@@ -37,7 +37,6 @@ function useInView(options) {
   return [ref, inView];
 }
 
-<<<<<<< HEAD
 // Generation X arrives from the left, Generation Z from the right, and the XZ
 // badge links them in the middle — the match, acted out.
 function GenerationsMeet() {
@@ -93,8 +92,6 @@ function GenerationsMeet() {
   );
 }
 
-=======
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
 /* ---- Premium duotone spot illustrations.
    Strict palette: brand burgundy (#740A03 + its shades), amber accent,
    and warm neutral creams. Nothing else. ---- */
@@ -208,10 +205,7 @@ function ExchangeIllustration({ className }) {
   );
 }
 
-<<<<<<< HEAD
 // The app's real functions, shown as photo cards. Each one is a link.
-=======
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
 const FEATURES = [
   {
     img: mentorLibraryImg,
@@ -552,17 +546,10 @@ export default function Landing() {
         }`}
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
-<<<<<<< HEAD
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5 sm:px-6 sm:py-3">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <img src={logoWhite} alt="XZ" className="h-16 w-16 sm:h-20 sm:w-20" />
             <span className="font-display text-xl font-semibold tracking-tight text-white sm:text-2xl">
-=======
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-6 sm:py-4">
-          <div className="flex items-center gap-2.5">
-            <img src={logoWhite} alt="XZ" className="h-14 w-14 sm:h-16 sm:w-16" />
-            <span className="font-display text-base font-semibold tracking-tight text-white sm:text-lg">
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
               Digital Roots
             </span>
           </div>
@@ -612,11 +599,7 @@ export default function Landing() {
             </span>
             .
           </h1>
-<<<<<<< HEAD
           <p className="reveal reveal-200 mt-6 max-w-lg text-base leading-relaxed text-gray-100 sm:text-lg md:text-xl">
-=======
-          <p className="reveal reveal-200 mx-auto mt-6 max-w-2xl text-base leading-relaxed text-gray-100 sm:text-lg md:text-xl">
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
            Connect with someone from another generation to exchange skills, preserve culture, and grow meaningful relationships powered by reciprocal learning.
           </p>
           <div className="reveal reveal-300 mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
@@ -652,7 +635,6 @@ export default function Landing() {
           aria-hidden
           className="morph-blob pointer-events-none absolute left-1/2 top-1/2 -z-0 h-[22rem] w-[22rem] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-brand-burgundy/10 via-amber-100/30 to-amber-100/10 blur-2xl sm:h-[30rem] sm:w-[30rem]"
         />
-<<<<<<< HEAD
         <div className="relative z-10 mx-auto max-w-4xl space-y-7 text-center">
           <div className={`flex items-center justify-center gap-1 text-2xl font-bold text-brand-burgundy sm:text-3xl ${missionInView ? 'reveal-in' : 'reveal-init'}`}>
             <span>Why</span>
@@ -681,14 +663,6 @@ export default function Landing() {
             >
               A reciprocal knowledge network.
             </span>
-=======
-        <div className="relative z-10 mx-auto max-w-3xl space-y-6 text-center">
-          <GenerationsIllustration
-            className={`mx-auto w-56 sm:w-72 ${missionInView ? 'reveal-in' : 'reveal-init'}`}
-          />
-          <h2 className={`font-display text-4xl font-semibold tracking-tight sm:text-5xl ${missionInView ? 'reveal-in' : 'reveal-init'}`}>
-            Why XZ exists
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
           </h2>
           <p className={`text-lg leading-relaxed text-gray-600 sm:text-xl ${missionInView ? 'reveal-in-delayed' : 'reveal-init'}`}>
             XZ matches people based on reciprocal interests
@@ -744,7 +718,6 @@ export default function Landing() {
       {/* Roots strength */}
       <section className="px-5 py-20 sm:px-6 sm:py-24">
         <div className="mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-2 md:gap-16">
-<<<<<<< HEAD
           <div className="relative mx-auto w-full max-w-sm md:order-2">
             <div className="absolute -inset-3 rotate-2 rounded-3xl bg-amber-100/60" aria-hidden />
             <img
@@ -756,22 +729,13 @@ export default function Landing() {
           </div>
           <div className="space-y-6 text-center md:order-1 md:text-left">
             <h2 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">Relationships that grow over time</h2>
-=======
-          <RootsTreeIllustration className="mx-auto w-52 sm:w-64 md:order-2" />
-          <div className="space-y-6 text-center md:order-1 md:text-left">
-            <h2 className="text-3xl font-bold sm:text-4xl">Relationships that grow over time</h2>
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
             <p className="text-base leading-relaxed text-gray-600 sm:text-lg">
               Unlike networks that measure popularity, XZ measures the strength of meaningful
               connection. Every conversation, lesson, and shared experience helps your roots grow
               deeper.
             </p>
             <div className="inline-flex items-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-5 text-left shadow-sm sm:px-8 sm:py-6">
-<<<<<<< HEAD
         
-=======
-              <span className="text-3xl font-bold text-brand-burgundy">→</span>
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
               <div>
                 <div className="text-sm font-semibold text-gray-500">Meaningful growth comes from</div>
                 <div className="text-lg font-bold sm:text-xl">Real connections, not metrics</div>
@@ -781,7 +745,6 @@ export default function Landing() {
         </div>
       </section>
 
-<<<<<<< HEAD
       {/* Final CTA  photo behind a deep burgundy wash */}
       <section className="relative overflow-hidden px-5 py-24 text-white sm:px-6 sm:py-32">
         <div className="absolute inset-0" aria-hidden="true">
@@ -791,13 +754,6 @@ export default function Landing() {
         <div className="relative z-10 mx-auto max-w-3xl space-y-6 text-center">
           <h2 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">Your wisdom is valuable. 
             So is theirs.</h2>
-=======
-      {/* Final CTA */}
-      <section className="bg-brand-burgundy px-5 py-20 text-white sm:px-6 sm:py-24">
-        <div className="mx-auto max-w-3xl space-y-6 text-center">
-          <ExchangeIllustration className="mx-auto w-44 sm:w-52" />
-          <h2 className="text-3xl font-bold sm:text-4xl">Your knowledge matters. So does theirs.</h2>
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
           <p className="text-base leading-relaxed text-white/90 sm:text-lg">
             Discover a different perspective on the next generation seeing their potential, skills, and unique contributions through fresh eyes.
           </p>
@@ -815,7 +771,6 @@ export default function Landing() {
         className="bg-gray-900 text-gray-400"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-<<<<<<< HEAD
         <div className="mx-auto max-w-6xl px-5 py-14 sm:px-6 sm:py-16">
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             {/* Brand */}
@@ -872,14 +827,6 @@ export default function Landing() {
           <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs sm:flex-row">
             <p>© 2026 Digital Roots · XZ. All rights reserved.</p>
             <p>Made by Gabrielle Mayengo.</p>
-=======
-        <div className="mx-auto max-w-6xl text-center">
-          <div className="mb-3 flex items-center justify-center gap-2">
-            <img src={logoWhite} alt="XZ" className="h-12 w-12" />
-            <span className="font-display text-lg font-semibold tracking-tight text-white">
-              Digital Roots
-            </span>
->>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
           </div>
         </div>
       </footer>
