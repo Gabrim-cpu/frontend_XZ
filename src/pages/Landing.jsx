@@ -1,8 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, BookOpen, Users, MessageCircle, Video, ChevronDown } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import logoWhite from '../Assets/logo_blanc-removebg-preview (1).png';
+import logoRed from '../Assets/XZ_RED-removebg-preview.png';
 import laptopImg from '../Assets/intergenerational_laptop.png';
+import genXImg from '../Assets/Gen_X-removebg-preview.png';
+import genZImg from '../Assets/gen_z-removebg-preview.png';
+import mentorLibraryImg from '../Assets/pexels-kampus-7983556.jpg';
+import bookTogetherImg from '../Assets/pexels-kampus-7551623.jpg';
+import storyReadingImg from '../Assets/pexels-kampus-7551618.jpg';
+import tableTalkImg from '../Assets/pexels-kampus-7551632.jpg';
 
 // The words that rotate in the hero headline.
 const SWAP_WORDS = ['teach', 'learn', 'share', 'preserve', 'build', 'pass on'];
@@ -28,6 +35,61 @@ function useInView(options) {
     return () => obs.disconnect();
   }, []);
   return [ref, inView];
+}
+
+// Generation X arrives from the left, Generation Z from the right, and the XZ
+// badge links them in the middle — the match, acted out.
+function GenerationsMeet() {
+  const [ref, inView] = useInView({ threshold: 0.35 });
+  return (
+    <div ref={ref} className="relative pt-4 sm:pt-6" aria-label="Generation X and Generation Z connected by XZ">
+      <div className="flex items-end justify-center">
+        {/* Generation X */}
+        <div className={`flex min-w-0 flex-col items-center ${inView ? 'gen-arrive-left' : 'gen-hidden'}`}>
+          <img
+            src={genXImg}
+            alt="Generation X — a group of older adults observing with curiosity"
+            loading="lazy"
+            draggable="false"
+            className="h-48 w-auto max-w-full select-none object-contain sm:h-72"
+          />
+          <span className="mt-3 rounded-full bg-brand-burgundy px-3.5 py-1.5 text-xs font-bold tracking-wide text-white shadow-md sm:px-5 sm:text-base">
+            Generation X
+          </span>
+          <span className="mt-1.5 text-[11px] font-medium text-gray-500 sm:text-sm">Wisdom to share</span>
+        </div>
+
+        {/* The connection XZ creates */}
+        <div className="relative z-10 -mx-3 flex w-20 flex-none items-center justify-center self-center sm:-mx-2 sm:w-28">
+          <svg viewBox="0 0 112 16" className={`absolute inset-x-0 w-full ${inView ? 'gen-link' : 'opacity-0'}`} aria-hidden="true">
+            <line
+              x1="6" y1="8" x2="106" y2="8"
+              stroke="#740A03" strokeWidth="3.5" strokeLinecap="round"
+              strokeDasharray="1 11" className="gen-link-flow"
+            />
+          </svg>
+          <div className={`relative flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-brand-burgundy/15 sm:h-14 sm:w-14 ${inView ? 'gen-pop' : 'opacity-0'}`}>
+            <img src={logoRed} alt="" className="h-5 w-auto sm:h-6" draggable="false" />
+          </div>
+        </div>
+
+        {/* Generation Z */}
+        <div className={`flex min-w-0 flex-col items-center ${inView ? 'gen-arrive-right' : 'gen-hidden'}`}>
+          <img
+            src={genZImg}
+            alt="Generation Z — a group of young people on their phones"
+            loading="lazy"
+            draggable="false"
+            className="h-52 w-auto max-w-full select-none object-contain sm:h-80"
+          />
+          <span className="mt-3 rounded-full bg-[#9C3325] px-3.5 py-1.5 text-xs font-bold tracking-wide text-white shadow-md sm:px-5 sm:text-base">
+            Generation Z
+          </span>
+          <span className="mt-1.5 text-[11px] font-medium text-gray-500 sm:text-sm">Curiosity to learn</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /* ---- Premium duotone spot illustrations.
@@ -143,28 +205,219 @@ function ExchangeIllustration({ className }) {
   );
 }
 
+// The app's real functions, shown as photo cards. Each one is a link.
 const FEATURES = [
   {
-    icon: Users,
-    title: 'Matched by what matters',
+    img: mentorLibraryImg,
+    chip: 'Mentorship',
+    title: 'Matched by What Matters',
     desc: 'A thoughtful matching algorithm connects you with mentors and learners based on shared interests and complementary skills.',
+    cta: 'Find your match',
   },
   {
-    icon: BookOpen,
-    title: 'Learn and teach',
-    desc: "Share what you know and learn what you don't. Every conversation is an opportunity for mutual growth.",
+    img: bookTogetherImg,
+    chip: 'Wisdom Hub',
+    title: 'Learn from Those Who Lived It',
+    desc: 'Elders share curated guides, life lessons, cultural knowledge, and mentorship — while younger members gain the insight that only lived experience can provide.',
+    cta: 'Explore wisdom',
   },
   {
-    icon: MessageCircle,
-    title: 'Build strong roots',
-    desc: 'Grow relationships through conversation, mentorship, and collaboration that last beyond any single interaction.',
+    img: storyReadingImg,
+    chip: 'Oral Archive',
+    title: 'Preserve Voices Forever',
+    desc: 'Record stories, traditions, and languages as audio memoirs — kept safe for the generations that follow.',
+    cta: 'Start recording',
   },
   {
-    icon: Video,
-    title: 'Preserve heritage',
-    desc: 'Record stories, traditions, languages, and lived experience for future generations to learn from.',
+    img: tableTalkImg,
+    chip: 'Messages & Calls',
+    title: 'Talk Across Generations',
+    desc: 'Voice notes, private messages, and live video sessions keep every mentorship close, wherever life happens.',
+    cta: 'Start a conversation',
   },
 ];
+
+/* ---- "How a match happens" — a faithful replica of the in-app Mentorship
+   discover cards. Two profiles reveal, the interests they share light up,
+   and the reciprocal match appears — exactly how XZ matches people. ---- */
+
+const JOURNEY = ['Connect', 'Chat', 'Learn Together', 'Grow Your Roots', 'Legacy Connection'];
+
+const DEMO_SHARED = ['Entrepreneurship', 'Traditional Cooking'];
+
+const DEMO_PEOPLE = [
+  {
+    name: 'Jessica', age: 22, role: 'Youth', initial: 'J', from: 'left', appearAt: 1,
+    bio: 'Computer science student. I can help with phones, apps and video editing.',
+    interests: ['Technology', 'Video Editing', 'Entrepreneurship', 'Traditional Cooking'],
+  },
+  {
+    name: 'Mama Rose', age: 68, role: 'Senior', initial: 'R', from: 'right', appearAt: 2,
+    bio: 'Retired restaurateur — 40 years of recipes, market wisdom and stories to pass on.',
+    interests: ['Entrepreneurship', 'Traditional Cooking', 'History', 'Health & Wellness'],
+  },
+];
+
+// Mirrors the PersonCard component users see in the Mentorship tab.
+function AppMatchCard({ person, stage }) {
+  const visible = stage >= person.appearAt;
+  return (
+    <div
+      className={`flex-1 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-700 ease-out ${
+        visible ? 'translate-x-0 opacity-100' : `opacity-0 ${person.from === 'left' ? '-translate-x-10' : 'translate-x-10'}`
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-brand-burgundy text-lg font-bold text-white">
+          {person.initial}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-bold text-gray-900">{person.name}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-brand-burgundy">
+            {person.role} · {person.age}
+          </p>
+          <span
+            className={`mt-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 transition-opacity duration-500 ${
+              stage >= 4 ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            ✦ 96% match
+          </span>
+        </div>
+      </div>
+      <p className="mt-3 text-sm italic leading-relaxed text-gray-500">"{person.bio}"</p>
+      <div className="mt-3">
+        <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">Interests & topics</p>
+        <div className="flex flex-wrap gap-1.5">
+          {person.interests.map((tag) => {
+            const lit = DEMO_SHARED.includes(tag) && stage >= 3;
+            return (
+              <span
+                key={tag}
+                className={`rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all duration-500 ${
+                  lit
+                    ? 'border-amber-400 bg-amber-50 text-amber-700 shadow-sm'
+                    : 'border-brand-burgundy/25 text-brand-burgundy'
+                }`}
+              >
+                {lit && '★ '}{tag}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+      <div
+        className={`mt-4 w-full rounded-xl bg-brand-burgundy py-2.5 text-center text-sm font-semibold text-white transition-opacity duration-500 ${
+          stage >= 4 ? 'opacity-100' : 'opacity-40'
+        }`}
+      >
+        Request session
+      </div>
+    </div>
+  );
+}
+
+function MatchShowcase({ onStart }) {
+  const [ref, inView] = useInView({ threshold: 0.3 });
+  const [stage, setStage] = useState(0);
+
+  // Advance the scene once it scrolls into view.
+  useEffect(() => {
+    if (!inView) return;
+    const steps = [
+      [1, 100],    // Jessica in
+      [2, 600],    // Mama Rose in
+      [3, 1200],   // exchange lines draw
+      [4, 2200],   // seedling + matched badge
+      [5, 2900],   // score, CTA, journey timeline
+    ];
+    const ids = steps.map(([s, delay]) => setTimeout(() => setStage(s), delay));
+    return () => ids.forEach(clearTimeout);
+  }, [inView]);
+
+  return (
+    <section ref={ref} className="bg-gray-50 px-5 py-20 sm:px-6 sm:py-24">
+      <div className="mx-auto max-w-4xl">
+        <div className="text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-burgundy">How a match happens</p>
+          <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+            Every connection starts with shared interests.
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-gray-600 sm:text-lg">
+            This is the real matching screen inside XZ: profiles are compared by the interests
+            they declare, and the ones you have in common light the way.
+          </p>
+        </div>
+
+        <div className="relative mt-12 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-8">
+          {/* The two profiles, exactly as they appear in the Mentorship tab */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
+            {DEMO_PEOPLE.map((person) => (
+              <AppMatchCard key={person.name} person={person} stage={stage} />
+            ))}
+          </div>
+
+          {/* Shared-interest legend */}
+          <div
+            className={`mt-5 flex flex-wrap items-center justify-center gap-2 text-sm transition-all duration-500 ${
+              stage >= 3 ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+            }`}
+          >
+            <span className="rounded-lg border border-amber-400 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">★</span>
+            <span className="font-semibold text-gray-700">2 shared interests found</span>
+            <span className="text-gray-400">— Reciprocal connection.</span>
+          </div>
+
+          {/* Compatibility */}
+          <div
+            className={`mt-8 border-t border-gray-100 pt-6 text-center transition-all duration-700 ${
+              stage >= 5 ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            }`}
+          >
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">Reciprocal Match</p>
+            <p className="mt-1 font-display text-5xl font-semibold text-brand-burgundy">96%</p>
+            <p className="mt-2 text-sm text-gray-500 sm:text-base">Because you can learn from each other.</p>
+            <button
+              onClick={onStart}
+              className="mx-auto mt-5 flex items-center justify-center gap-2 rounded-full bg-brand-burgundy px-7 py-3.5 text-sm font-bold text-white transition-all hover:bg-opacity-90 min-h-[48px]"
+            >
+              Start Connection <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* What happens after — journey timeline */}
+        <div className="mt-12 overflow-x-auto pb-2">
+          <div className="mx-auto flex min-w-[560px] max-w-3xl items-start">
+            {JOURNEY.map((step, i) => (
+              <React.Fragment key={step}>
+                {i > 0 && (
+                  <div className="mt-[7px] h-[2px] flex-1 overflow-hidden rounded-full bg-gray-200">
+                    <div
+                      className={`h-full origin-left bg-brand-burgundy transition-transform duration-500 ease-out ${
+                        stage >= 5 ? 'scale-x-100' : 'scale-x-0'
+                      }`}
+                      style={{ transitionDelay: `${i * 320}ms` }}
+                    />
+                  </div>
+                )}
+                <div
+                  className={`flex w-24 flex-col items-center gap-2 transition-all duration-500 ${
+                    stage >= 5 ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+                  }`}
+                  style={{ transitionDelay: `${i * 320 + 120}ms` }}
+                >
+                  <span className={`h-4 w-4 rounded-full border-2 ${i === JOURNEY.length - 1 ? 'border-amber-500 bg-amber-400' : 'border-brand-burgundy bg-brand-burgundy'}`} />
+                  <span className="text-center text-[11px] font-bold leading-tight text-gray-700">{step}</span>
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -238,10 +491,49 @@ export default function Landing() {
           animation: wordSwap 2.4s ease-in-out both;
           transform-origin: center;
         }
+        /* Generations meet: X walks in from the left, Z from the right,
+           then the XZ badge pops in and pulses between them. */
+        @keyframes genArriveLeft {
+          from { opacity: 0; transform: translateX(-60px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes genArriveRight {
+          from { opacity: 0; transform: translateX(60px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes genPop {
+          0% { opacity: 0; transform: scale(0.3); }
+          70% { opacity: 1; transform: scale(1.15); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes genGlow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(116, 10, 3, 0.28); }
+          50% { box-shadow: 0 0 0 14px rgba(116, 10, 3, 0); }
+        }
+        @keyframes genLinkIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes genFlow { to { stroke-dashoffset: -24; } }
+        .gen-hidden { opacity: 0; }
+        .gen-arrive-left { animation: genArriveLeft 1.1s cubic-bezier(0.22, 0.7, 0.2, 1) both; }
+        .gen-arrive-right { animation: genArriveRight 1.1s cubic-bezier(0.22, 0.7, 0.2, 1) both; }
+        .gen-pop {
+          animation:
+            genPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.9s both,
+            genGlow 2.6s ease-in-out 1.8s infinite;
+        }
+        .gen-link { animation: genLinkIn 0.8s ease 0.75s both; }
+        .gen-link-flow { animation: genFlow 1.2s linear infinite; }
         @media (prefers-reduced-motion: reduce) {
           .reveal, .ken-burns, .word-swap, .morph-blob { animation: none !important; }
           .reveal-init { opacity: 1; }
           .reveal-in, .reveal-in-delayed { animation: none !important; opacity: 1; }
+          .gen-hidden { opacity: 1; }
+          .gen-arrive-left, .gen-arrive-right, .gen-pop, .gen-link, .gen-link-flow {
+            animation: none !important;
+            opacity: 1;
+          }
         }
       `}</style>
 
@@ -249,15 +541,15 @@ export default function Landing() {
       <nav
         className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 ${
           scrolled
-            ? 'bg-gradient-to-r from-brand-burgundy/70 to-brand-burgundy/45 backdrop-blur-md shadow-md'
+            ? 'bg-brand-burgundy/95 shadow-lg backdrop-blur-xl'
             : 'bg-transparent'
         }`}
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-6 sm:py-4">
-          <div className="flex items-center gap-2.5">
-            <img src={logoWhite} alt="XZ" className="h-14 w-14 sm:h-16 sm:w-16" />
-            <span className="font-display text-base font-semibold tracking-tight text-white sm:text-lg">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5 sm:px-6 sm:py-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <img src={logoWhite} alt="XZ" className="h-16 w-16 sm:h-20 sm:w-20" />
+            <span className="font-display text-xl font-semibold tracking-tight text-white sm:text-2xl">
               Digital Roots
             </span>
           </div>
@@ -288,12 +580,14 @@ export default function Landing() {
             className="h-full w-full object-cover"
             loading="eager"
           />
-          {/* Legibility overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/70" />
+          {/* Legibility overlay — anchored left so the people stay visible on the right */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-black/10" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/50 to-transparent" />
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 mx-auto max-w-3xl text-center text-white">
+        {/* Content — left-aligned so the photo breathes */}
+        <div className="relative z-10 mx-auto w-full max-w-6xl text-white">
+          <div className="max-w-xl text-left">
           <h1 className="reveal text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
             Every generation has something to{' '}
             <span
@@ -305,10 +599,10 @@ export default function Landing() {
             </span>
             .
           </h1>
-          <p className="reveal reveal-200 mx-auto mt-6 max-w-2xl text-base leading-relaxed text-gray-100 sm:text-lg md:text-xl">
+          <p className="reveal reveal-200 mt-6 max-w-lg text-base leading-relaxed text-gray-100 sm:text-lg md:text-xl">
            Connect with someone from another generation to exchange skills, preserve culture, and grow meaningful relationships powered by reciprocal learning.
           </p>
-          <div className="reveal reveal-300 mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="reveal reveal-300 mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <button
               onClick={() => navigate('/register')}
               className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-burgundy px-8 py-4 text-base font-bold text-white transition-all hover:bg-opacity-90 sm:w-auto min-h-[56px]"
@@ -321,6 +615,7 @@ export default function Landing() {
             >
               Sign in
             </button>
+          </div>
           </div>
         </div>
 
@@ -340,44 +635,82 @@ export default function Landing() {
           aria-hidden
           className="morph-blob pointer-events-none absolute left-1/2 top-1/2 -z-0 h-[22rem] w-[22rem] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-brand-burgundy/10 via-amber-100/30 to-amber-100/10 blur-2xl sm:h-[30rem] sm:w-[30rem]"
         />
-        <div className="relative z-10 mx-auto max-w-3xl space-y-6 text-center">
-          <GenerationsIllustration
-            className={`mx-auto w-56 sm:w-72 ${missionInView ? 'reveal-in' : 'reveal-init'}`}
-          />
-          <h2 className={`font-display text-4xl font-semibold tracking-tight sm:text-5xl ${missionInView ? 'reveal-in' : 'reveal-init'}`}>
-            Why XZ exists
+        <div className="relative z-10 mx-auto max-w-4xl space-y-7 text-center">
+          <div className={`flex items-center justify-center gap-1 text-2xl font-bold text-brand-burgundy sm:text-3xl ${missionInView ? 'reveal-in' : 'reveal-init'}`}>
+            <span>Why</span>
+            <img src={logoRed} alt="XZ" className="h-14 w-auto sm:h-20" />
+            <span>exists</span>
+          </div>
+          <h2 className="font-display text-4xl font-semibold leading-tight tracking-tight sm:text-6xl">
+            {/* Struck through as you scroll to it... */}
+            <span className={`relative inline-block transition-colors duration-700 ${missionInView ? 'text-gray-400' : 'text-black'}`} style={{ transitionDelay: '500ms' }}>
+              Another social network.
+              <span
+                aria-hidden
+                className={`absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 rounded-full bg-brand-burgundy transition-transform duration-700 ease-out sm:h-[5px] ${
+                  missionInView ? 'scale-x-100' : 'scale-x-0'
+                }`}
+                style={{ transformOrigin: 'left', transitionDelay: '500ms' }}
+              />
+            </span>
+            <br />
+            {/* ...and the truth rises in its place. */}
+            <span
+              className={`inline-block text-brand-burgundy transition-all duration-700 ease-out ${
+                missionInView ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+              }`}
+              style={{ transitionDelay: '1300ms' }}
+            >
+              A reciprocal knowledge network.
+            </span>
           </h2>
-          <p className={`text-base leading-relaxed text-gray-600 sm:text-lg ${missionInView ? 'reveal-in-delayed' : 'reveal-init'}`}>
-            Modern technology connects millions, yet generations drift further apart. Valuable
-            knowledge is lost while digital opportunity stays out of reach for many. XZ bridges
-            that gap — a place where youth and elders learn from one another, exchange skills, and
-            preserve cultural heritage together.
+          <p className={`text-lg leading-relaxed text-gray-600 sm:text-xl ${missionInView ? 'reveal-in-delayed' : 'reveal-init'}`}>
+            XZ matches people based on reciprocal interests
+            creating
+            meaningful relationships.
           </p>
+          <GenerationsMeet />
         </div>
       </section>
+
+      {/* How a match happens — animated demonstration */}
+      <MatchShowcase onStart={() => navigate('/register')} />
 
       {/* Features */}
       <section className="bg-gray-50 px-5 py-20 sm:px-6 sm:py-24">
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-12 text-center text-3xl font-bold sm:mb-16 sm:text-4xl">
-            Meaningful connections, by design
+          <h2 className="mb-12 text-center font-display text-4xl font-semibold tracking-tight sm:mb-16 sm:text-5xl">
+            Crafted with purpose and care.
           </h2>
-          <div className="grid gap-5 sm:grid-cols-2 sm:gap-8">
-            {FEATURES.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={feature.title}
-                  className="rounded-2xl border border-gray-100 bg-white p-6 transition-shadow hover:shadow-lg sm:p-8"
-                >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-burgundy/5 text-brand-burgundy">
-                    <Icon className="h-6 w-6" strokeWidth={1.75} />
-                  </div>
-                  <h3 className="text-xl font-bold sm:text-2xl">{feature.title}</h3>
-                  <p className="mt-2 text-base leading-relaxed text-gray-600">{feature.desc}</p>
+          <div className="grid gap-6 sm:grid-cols-2 sm:gap-8">
+            {FEATURES.map((feature) => (
+              <button
+                key={feature.title}
+                onClick={() => navigate('/register')}
+                className="group overflow-hidden rounded-3xl border border-gray-100 bg-white text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="relative h-52 overflow-hidden sm:h-60">
+                  <img
+                    src={feature.img}
+                    alt={feature.title}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <span className="absolute bottom-4 left-4 rounded-full bg-brand-burgundy px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-md">
+                    {feature.chip}
+                  </span>
                 </div>
-              );
-            })}
+                <div className="p-6 sm:p-7">
+                  <h3 className="font-display text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-2 text-base leading-relaxed text-gray-600">{feature.desc}</p>
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-wide text-brand-burgundy transition-all group-hover:gap-3">
+                    {feature.cta} <ArrowRight className="h-4 w-4" />
+                  </span>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
       </section>
@@ -385,16 +718,24 @@ export default function Landing() {
       {/* Roots strength */}
       <section className="px-5 py-20 sm:px-6 sm:py-24">
         <div className="mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-2 md:gap-16">
-          <RootsTreeIllustration className="mx-auto w-52 sm:w-64 md:order-2" />
+          <div className="relative mx-auto w-full max-w-sm md:order-2">
+            <div className="absolute -inset-3 rotate-2 rounded-3xl bg-amber-100/60" aria-hidden />
+            <img
+              src={laptopImg}
+              alt="An elder and a young man learning together"
+              loading="lazy"
+              className="relative w-full rounded-3xl object-cover shadow-lg"
+            />
+          </div>
           <div className="space-y-6 text-center md:order-1 md:text-left">
-            <h2 className="text-3xl font-bold sm:text-4xl">Relationships that grow over time</h2>
+            <h2 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">Relationships that grow over time</h2>
             <p className="text-base leading-relaxed text-gray-600 sm:text-lg">
               Unlike networks that measure popularity, XZ measures the strength of meaningful
               connection. Every conversation, lesson, and shared experience helps your roots grow
               deeper.
             </p>
             <div className="inline-flex items-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-5 text-left shadow-sm sm:px-8 sm:py-6">
-              <span className="text-3xl font-bold text-brand-burgundy">→</span>
+        
               <div>
                 <div className="text-sm font-semibold text-gray-500">Meaningful growth comes from</div>
                 <div className="text-lg font-bold sm:text-xl">Real connections, not metrics</div>
@@ -404,38 +745,89 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="bg-brand-burgundy px-5 py-20 text-white sm:px-6 sm:py-24">
-        <div className="mx-auto max-w-3xl space-y-6 text-center">
-          <ExchangeIllustration className="mx-auto w-44 sm:w-52" />
-          <h2 className="text-3xl font-bold sm:text-4xl">Your knowledge matters. So does theirs.</h2>
+      {/* Final CTA  photo behind a deep burgundy wash */}
+      <section className="relative overflow-hidden px-5 py-24 text-white sm:px-6 sm:py-32">
+        <div className="absolute inset-0" aria-hidden="true">
+          <img src={tableTalkImg} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#4A0602]/90 via-brand-burgundy/85 to-[#4A0602]/92" />
+        </div>
+        <div className="relative z-10 mx-auto max-w-3xl space-y-6 text-center">
+          <h2 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">Your wisdom is valuable. 
+            So is theirs.</h2>
           <p className="text-base leading-relaxed text-white/90 sm:text-lg">
-            Join a new generation of learners, mentors, storytellers, and innovators building
-            stronger communities together.
+            Discover a different perspective on the next generation seeing their potential, skills, and unique contributions through fresh eyes.
           </p>
           <button
             onClick={() => navigate('/register')}
             className="mx-auto flex w-full items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-brand-burgundy transition-all hover:bg-white/90 sm:w-auto min-h-[56px]"
           >
-            Start building your roots <ArrowRight className="h-5 w-5" />
+            Bridge the gap <ArrowRight className="h-5 w-5" />
           </button>
         </div>
       </section>
 
       {/* Footer */}
       <footer
-        className="bg-gray-900 px-5 py-10 text-gray-400 sm:px-6 sm:py-12"
-        style={{ paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom))' }}
+        className="bg-gray-900 text-gray-400"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="mx-auto max-w-6xl text-center">
-          <div className="mb-3 flex items-center justify-center gap-2">
-            <img src={logoWhite} alt="XZ" className="h-12 w-12" />
-            <span className="font-display text-lg font-semibold tracking-tight text-white">
-              Digital Roots
-            </span>
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-6 sm:py-16">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Brand */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2.5">
+                <img src={logoWhite} alt="XZ" className="h-16 w-16" />
+                <span className="font-display text-xl font-semibold tracking-tight text-white">
+                  Digital Roots
+                </span>
+              </div>
+              <p className="text-sm leading-relaxed">
+                A reciprocal knowledge network bridging generations through mentorship, stories,
+                and living heritage.
+              </p>
+            </div>
+
+            {/* Platform */}
+            <div>
+              <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">Platform</h4>
+              <ul className="space-y-2.5 text-sm">
+                {['Mentorship Matching', 'Wisdom Hub', 'Oral Archive', 'Messages & Video Calls'].map((item) => (
+                  <li key={item}>
+                    <button onClick={() => navigate('/register')} className="transition-colors hover:text-white">
+                      {item}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Community */}
+            <div>
+              <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">Community</h4>
+              <ul className="space-y-2.5 text-sm">
+                <li><button onClick={() => navigate('/register')} className="transition-colors hover:text-white">Join XZ</button></li>
+                <li><button onClick={() => navigate('/login')} className="transition-colors hover:text-white">Sign in</button></li>
+                <li><button onClick={() => navigate('/register')} className="transition-colors hover:text-white">Become a mentor</button></li>
+                <li><button onClick={() => navigate('/register')} className="transition-colors hover:text-white">Share your Wisdom</button></li>
+              </ul>
+            </div>
+
+            {/* Legal / contact */}
+            <div>
+              <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">Support</h4>
+              <ul className="space-y-2.5 text-sm">
+                <li><a href="mailto:hello@digitalroots-xz.duckdns.org?subject=Digital%20Roots%20support" className="transition-colors hover:text-white">Contact us</a></li>
+                <li><button onClick={() => navigate('/privacy')} className="transition-colors hover:text-white">Privacy policy</button></li>
+                <li><button onClick={() => navigate('/terms')} className="transition-colors hover:text-white">Terms of use</button></li>
+                <li><button onClick={() => navigate('/guidelines')} className="transition-colors hover:text-white">Community guidelines</button></li>
+              </ul>
+            </div>
           </div>
-          <p className="text-sm">Bridging generations through knowledge, stories, and connection.</p>
-          <p className="mt-3 text-sm">© 2026 Digital Roots. Every generation has something to teach.</p>
+
+          <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs sm:flex-row">
+            <p>© 2026 Digital Roots · XZ. All rights reserved.</p>
+            <p>Made by Gabrielle Mayengo.</p>
+          </div>
         </div>
       </footer>
     </div>

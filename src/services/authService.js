@@ -92,20 +92,24 @@ export async function signInWithGoogle() {
 
   const user = credential.user;
 
-  // Check if user exists in Firestore, if not create profile
-  const userRef = doc(db, 'users', user.uid);
-  const snapshot = await getDoc(userRef);
-
-  if (!snapshot.exists()) {
-    await setDoc(userRef, {
-      uid: user.uid,
-      name: user.displayName || (user.email ? user.email.split('@')[0] : 'User'),
-      email: user.email || null,
-      role: 'Senior', // Default role for Google sign-in
-      language: 'en',
-      avatar: user.photoURL || null,
-      createdAt: serverTimestamp(),
-    });
+  // Mirror the profile into Firestore, but never let that block the signup —
+  // the Postgres backend is the source of truth; Firestore is best-effort
+  // (e.g. security rules may deny this write).
+  try {
+    const userRef = doc(db, 'users', user.uid);
+    const snapshot = await getDoc(userRef);
+    if (!snapshot.exists()) {
+      await setDoc(userRef, {
+        uid: user.uid,
+        name: user.displayName || (user.email ? user.email.split('@')[0] : 'User'),
+        email: user.email || null,
+        language: 'en',
+        avatar: user.photoURL || null,
+        createdAt: serverTimestamp(),
+      });
+    }
+  } catch (firestoreErr) {
+    console.warn('Firestore profile mirror failed (non-fatal):', firestoreErr);
   }
 
   return user;

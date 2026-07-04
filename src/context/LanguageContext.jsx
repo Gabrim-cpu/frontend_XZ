@@ -7,7 +7,7 @@ const LanguageContext = createContext(null);
 const translations = {
   en: {
     // Auth & Register
-    createAccount: 'Create an account',
+    createAccount: 'Create  account',
     joinCommunity: 'Join the intergenerational community.',
     backToSignIn: 'Back to sign in',
     yourIdentity: 'Your identity',
@@ -177,6 +177,18 @@ const translations = {
     sendRequest: 'Send request',
     requestSession: 'Request session',
     connectFailed: 'Could not send the request. Try again.',
+    conversations: 'Conversations',
+    searchConversations: 'Search a name or message...',
+    noSearchResults: 'Nothing found',
+    noSearchResultsSub: 'Try a different name or word',
+    storiesTab: 'Stories',
+    libraryTab: 'Library',
+    searchArchive: 'Search stories, articles...',
+    preferences: 'Preferences',
+    languageLabel: 'Language',
+    languageDesc: 'Choose your preferred language',
+    darkThemeDesc: 'Easier on the eyes at night',
+    saveChanges: 'Save Changes',
   },
   fr: {
     // Auth & Register
@@ -350,6 +362,18 @@ const translations = {
     sendRequest: 'Envoyer la demande',
     requestSession: 'Demander une session',
     connectFailed: "Impossible d'envoyer la demande. Réessayez.",
+    conversations: 'Conversations',
+    searchConversations: 'Rechercher un nom ou un message...',
+    noSearchResults: 'Aucun résultat',
+    noSearchResultsSub: 'Essayez un autre nom ou mot',
+    storiesTab: 'Histoires',
+    libraryTab: 'Bibliothèque',
+    searchArchive: 'Rechercher des histoires, des articles...',
+    preferences: 'Préférences',
+    languageLabel: 'Langue',
+    languageDesc: 'Choisissez votre langue préférée',
+    darkThemeDesc: 'Plus doux pour les yeux la nuit',
+    saveChanges: 'Enregistrer',
   }
 };
 

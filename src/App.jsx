@@ -8,6 +8,8 @@ import ChatMessaging from './components/ChatMessaging';
 import RecordingSession from './components/RecordingSession';
 import Register from './pages/Register';
 import Landing from './pages/Landing';
+import BrandLoader from './components/BrandLoader';
+import { PrivacyPolicy, TermsOfUse, CommunityGuidelines } from './pages/Legal';
 import Profile from './pages/Profile';
 import Onboarding from './pages/Onboarding';
 import WisdomHub from './pages/WisdomHub';
@@ -57,14 +59,7 @@ function ProtectedRoute({ children, skipOnboardingCheck = false }) {
   const { isAuthenticated, loading, appUser } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-brand-burgundy/20 border-t-brand-burgundy rounded-full animate-spin" />
-          <span className="text-sm text-stone-500">Loading...</span>
-        </div>
-      </div>
-    );
+    return <BrandLoader fullScreen size="lg" />;
   }
 
   if (!isAuthenticated) {
@@ -86,14 +81,7 @@ function PublicOnlyRoute({ children }) {
   const { isAuthenticated, loading, appUser } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-brand-burgundy/20 border-t-brand-burgundy rounded-full animate-spin" />
-          <span className="text-sm text-stone-500">Loading...</span>
-        </div>
-      </div>
-    );
+    return <BrandLoader fullScreen size="lg" />;
   }
 
   // Only leave the public page when the backend profile actually loaded —
@@ -119,6 +107,9 @@ export default function App() {
     <LanguageProvider>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfUse />} />
+        <Route path="/guidelines" element={<CommunityGuidelines />} />
 
         <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
         <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />

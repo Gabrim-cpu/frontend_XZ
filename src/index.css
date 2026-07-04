@@ -3,11 +3,56 @@
 @tailwind utilities;
 
 
+html {
+    -webkit-tap-highlight-color: transparent;
+}
+
 body {
     background-color: #FBF9F6;
     color: #740A03;
     font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
 }
+
+/* ---------- Type polish ----------
+   Bold stays truly bold; serif display faces get tightened tracking. */
+.font-serif { letter-spacing: -0.01em; }
+h1.font-serif, h2.font-serif { letter-spacing: -0.02em; }
+
+/* Slim, quiet scrollbars */
+* { scrollbar-width: thin; scrollbar-color: rgba(0, 0, 0, 0.16) transparent; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.16); border-radius: 9999px; }
+*::-webkit-scrollbar-track { background: transparent; }
+.dark * { scrollbar-color: rgba(255, 255, 255, 0.14) transparent; }
+.dark *::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.14); }
+
+/* Tactile press feedback on touch screens */
+@media (hover: none) {
+    button:active { transform: scale(0.97); transition: transform 120ms ease; }
+}
+
+/* ---------- Branded XZ loader ---------- */
+@keyframes xz-orbit { to { transform: rotate(360deg); } }
+@keyframes xz-orbit-reverse { to { transform: rotate(-360deg); } }
+@keyframes xz-breathe {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.12); opacity: 0.85; }
+}
+@keyframes xz-ripple {
+    0% { transform: scale(0.6); opacity: 0.5; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+.xz-orbit { animation: xz-orbit 1.1s linear infinite; }
+.xz-orbit-reverse { animation: xz-orbit-reverse 1.8s linear infinite; }
+.xz-breathe { animation: xz-breathe 1.6s ease-in-out infinite; }
+.xz-ripple { animation: xz-ripple 1.6s ease-out infinite; }
+.dark .xz-loader-bg { background-color: #14100E; }
 
 /* ---------- Dark theme ----------
    Toggled by adding .dark to <html>. Instead of sprinkling dark: variants on
@@ -55,6 +100,7 @@ body {
 .dark .bg-\[\#FDFBF9\] { background-color: #1B1512; }
 .dark .bg-white\/80 { background-color: rgba(32, 25, 21, 0.85); }
 .dark .bg-white\/60 { background-color: rgba(32, 25, 21, 0.6); }
+.dark .bg-white\/90 { background-color: rgba(32, 25, 21, 0.92); }
 
 /* Stone palette (used by chat, dashboard, badges) */
 .dark .text-stone-400 { color: #877A72; }
@@ -80,3 +126,4 @@ body {
 .dark .text-amber-700 { color: #FBBF24; }
 .dark .text-red-700 { color: #F87171; }
 .dark .border-red-200 { border-color: rgba(239, 68, 68, 0.35); }
+.dark .ring-offset-2 { --tw-ring-offset-color: #201915; }

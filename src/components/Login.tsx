@@ -112,7 +112,7 @@ export default function Login() {
       <div className="hidden lg:flex lg:w-1/2 relative bg-brand-burgundy text-white overflow-hidden flex-col justify-between p-12 xl:p-16">
         {/* Logo */}
         <button onClick={() => navigate('/')} className="relative z-10 flex items-center gap-3 hover:opacity-80 transition w-fit">
-          <img src={logoXZ} alt="XZ" className="w-9 h-9 brightness-0 invert" />
+          <img src={logoXZ} alt="XZ" className="w-16 h-16 brightness-0 invert" />
         </button>
 
         {/* Headline */}
@@ -125,7 +125,7 @@ export default function Login() {
 
         {/* Watermark hourglass */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <img src={logoXZ} alt="" className="w-[55%] h-[55%] brightness-0 invert opacity-[0.06]" />
+          <img src={logoXZ} alt="" className="w-[62%] h-[62%] brightness-0 invert opacity-[0.09]" />
         </div>
 
         {/* Footer tagline */}
@@ -148,8 +148,8 @@ export default function Login() {
         {/* Mobile logo header */}
         <div className="lg:hidden flex items-center justify-center pt-8 pb-2">
           <button onClick={() => navigate('/')} className="flex items-center gap-2">
-            <img src={logoXZ} alt="XZ" className="w-11 h-11" />
-            <span className="text-sm font-bold text-brand-burgundy">XZ</span>
+            <img src={logoXZ} alt="XZ" className="w-16 h-16" />
+            <span className="text-base font-extrabold text-brand-burgundy">XZ</span>
           </button>
         </div>
 
@@ -157,8 +157,8 @@ export default function Login() {
           <div className="w-full max-w-md space-y-6 animate-fade-in-up">
             {/* Heading */}
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-              <p className="text-gray-500 text-base mt-1">Continue your intergenerational journey.</p>
+              <h2 className="text-4xl font-extrabold text-gray-900">Welcome Back</h2>
+              <p className="text-gray-600 text-base font-medium mt-1.5">Continue your intergenerational journey.</p>
             </div>
 
             {errors.general && (
@@ -239,7 +239,7 @@ export default function Login() {
                     Entering...
                   </>
                 ) : (
-                  <>Sign In <ArrowRight className="w-5 h-5" /></>
+                  <>Continue to Digital Roots <ArrowRight className="w-5 h-5" /></>
                 )}
               </button>
             </form>
@@ -269,9 +269,9 @@ export default function Login() {
 
             {/* Sign up link */}
             <p className="text-center text-sm text-gray-500">
-              New to our community?{' '}
+              New to XZ?{' '}
               <button type="button" onClick={() => navigate('/register')} className="text-brand-burgundy font-bold hover:underline">
-                Create an account
+                Create your Account
               </button>
             </p>
 
@@ -294,7 +294,7 @@ export default function Login() {
                   <Mail className="w-7 h-7 text-green-600" />
                 </div>
                 <p className="font-semibold text-gray-900">Email sent!</p>
-                <p className="text-sm text-gray-500 mt-1">Check your inbox for a reset link.</p>
+                <p className="text-sm text-gray-500 mt-1">Check your spams for a reset link.</p>
                 <button onClick={() => setShowForgot(false)} className="mt-4 px-6 py-2.5 bg-brand-burgundy text-white rounded-xl font-semibold text-sm">Back to Login</button>
               </div>
             ) : (

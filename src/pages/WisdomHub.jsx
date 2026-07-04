@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { getThreads, getMessages, sendMessage, uploadChatMedia, getRecommendations, getAllUsers, requestConnection, getPendingRequests, acceptConnection, rejectConnection, getAcceptedConnections, getFeed, createPost, getStories, getLibrary, getPointsSummary, togglePostLike, getPublicProfile } from '../services/apiService';
 import BadgeDisplay from '../components/BadgeDisplay';
 import { compressImage, fileToDataUrl, blobToDataUrl } from '../utils/imageUtils';
+import BrandLoader from '../components/BrandLoader';
 import { updateProfile } from '../services/authService';
 import NotificationBell from '../components/NotificationBell';
 import VideoCall, { makeRoomName } from '../components/VideoCall';
@@ -53,6 +54,17 @@ export default function WisdomHub() {
   const startCall = (otherUserId, { audioOnly = false } = {}) => {
     if (!appUser?.id || !otherUserId) return;
     setCall({ roomName: makeRoomName(appUser.id, otherUserId), audioOnly });
+    // The call room is only half the story — the other person must be TOLD.
+    // A chat message rings their notification bell and tells them which
+    // button to press; both sides derive the same room name independently.
+    const invite = audioOnly
+      ? (language === 'fr'
+          ? "📞 Je vous appelle — ouvrez notre discussion et appuyez sur l'icône téléphone pour me rejoindre."
+          : '📞 I am calling you — open our chat and press the phone icon to join me.')
+      : (language === 'fr'
+          ? '🎥 Je démarre un appel vidéo — ouvrez notre discussion et appuyez sur la caméra pour me rejoindre.'
+          : '🎥 I started a video call — open our chat and press the camera icon to join me.');
+    sendMessage(otherUserId, invite, 'text').catch(() => {});
   };
 
   const appUser = auth?.appUser || {};
@@ -117,10 +129,10 @@ export default function WisdomHub() {
       {/* Sidebar — Desktop only. Collapses to an icon rail while scrolling. */}
       <div className={`hidden md:flex bg-white border-r border-gray-100 flex-col flex-shrink-0 transition-all duration-300 ${sidebarOpen ? 'md:w-56' : 'md:w-[4.5rem]'}`}>
         <div className={`py-5 flex items-center gap-2 ${sidebarOpen ? 'px-5' : 'px-0 justify-center'}`}>
-          <img src={logoXZ} alt="XZ" className="w-7 h-7 flex-shrink-0" />
+          <img src={logoXZ} alt="XZ" className="w-10 h-10 flex-shrink-0" />
           {sidebarOpen && (
             <div className="overflow-hidden whitespace-nowrap">
-              <h1 className="text-base font-serif font-bold text-brand-burgundy leading-none">Digital Roots</h1>
+              <h1 className="text-lg font-serif font-bold text-brand-burgundy leading-none">Digital Roots</h1>
               <p className="text-[10px] text-gray-400 mt-0.5">Bridging Generations</p>
             </div>
           )}
@@ -186,14 +198,15 @@ export default function WisdomHub() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0 md:pb-0 pb-20">
         {/* Header */}
-        <div className="bg-brand-burgundy px-4 py-3 flex items-center justify-between gap-3 border-b border-gray-100/50 md:bg-[#FBF9F8]">
-          <div className="flex-1">
-            <img src={logoXZ} alt="XZ" className="w-6 h-6 md:hidden" />
+        <div className="bg-gradient-to-r from-brand-burgundy to-[#4A0602] md:bg-none md:bg-[#FBF9F8] px-4 py-3 flex items-center justify-between gap-3 border-b border-black/10 md:border-gray-100/50 shadow-sm md:shadow-none">
+          <div className="flex-1 flex items-center gap-2.5 min-w-0">
+            <img src={logoXZ} alt="XZ" className="w-9 h-9 md:hidden flex-shrink-0" />
+            <span className="md:hidden font-serif font-bold text-white text-lg tracking-tight truncate">Digital Roots</span>
             <h1 className="hidden md:block text-lg font-serif font-bold text-brand-burgundy">{navItems.find((n) => n.id === activeTab)?.label || 'Digital Roots'}</h1>
           </div>
           <div className="flex items-center gap-2">
             <NotificationBell />
-            <button onClick={() => setActiveTab('settings')} className="w-10 h-10 bg-white md:bg-brand-burgundy rounded-full flex items-center justify-center text-brand-burgundy md:text-white font-bold text-sm overflow-hidden min-h-[44px]">
+            <button onClick={() => setActiveTab('settings')} className="w-10 h-10 bg-white md:bg-brand-burgundy rounded-full flex items-center justify-center text-brand-burgundy md:text-white font-bold text-sm overflow-hidden min-h-[44px] ring-2 ring-white/25 md:ring-0">
               {userAvatar ? (
                 <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
               ) : (
@@ -213,8 +226,8 @@ export default function WisdomHub() {
         </div>
       </div>
 
-      {/* Bottom Navigation — Mobile only */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center gap-0" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      {/* Bottom Navigation — Mobile only, frosted glass with active pill */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-gray-200 flex items-stretch" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = activeTab === item.id;
@@ -222,14 +235,18 @@ export default function WisdomHub() {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex-1 flex flex-col items-center justify-center py-3 px-2 min-h-[60px] transition-colors ${
-                active
-                  ? 'text-brand-burgundy bg-[#FBF1F0]'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className="flex-1 flex flex-col items-center justify-center pt-2 pb-1.5 min-h-[60px]"
             >
-              <Icon className="w-6 h-6 mb-1" />
-              <span className="text-[11px] font-semibold text-center">{item.label}</span>
+              <span
+                className={`flex items-center justify-center h-8 px-4 rounded-full transition-all duration-200 ${
+                  active ? 'bg-[#FBF1F0] text-brand-burgundy' : 'text-gray-400'
+                }`}
+              >
+                <Icon className="w-[22px] h-[22px]" strokeWidth={active ? 2.25 : 1.75} />
+              </span>
+              <span className={`text-[10px] mt-0.5 leading-tight text-center transition-colors ${active ? 'text-brand-burgundy font-semibold' : 'text-gray-400 font-medium'}`}>
+                {item.label}
+              </span>
             </button>
           );
         })}
@@ -326,7 +343,7 @@ function UserProfileModal({ userId, isSelf, onClose, onMessage }) {
           <p className="text-sm text-gray-500 text-center py-10">{t('profileLoadFailed')}</p>
         ) : !profile ? (
           <div className="flex justify-center py-14">
-            <div className="w-8 h-8 border-2 border-brand-burgundy/20 border-t-brand-burgundy rounded-full animate-spin" />
+            <BrandLoader size="sm" />
           </div>
         ) : (
           <div className="text-center">
@@ -434,6 +451,9 @@ function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [sendError, setSendError] = useState(null);
+  const [threadSearch, setThreadSearch] = useState('');
   const [socketConnected, setSocketConnected] = useState(false);
   // Holds the participant info for a conversation opened from outside (a
   // connection card / the new-chat picker) so the thread renders immediately
@@ -556,13 +576,17 @@ function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall
         reader.onloadend = async () => {
           try {
             setIsUploading(true);
+            setSendError(null);
             const uploadResult = await uploadChatMedia(reader.result, 'video');
             if (uploadResult.success) {
               const transcript = liveTranscript.trim() || 'Voice note';
               const data = await sendMessage(activeThreadId, transcript, 'voice', uploadResult.url, transcript);
               if (data.success) { setMessages((prev) => [...prev, data.message]); fetchThreads(); }
             }
-          } catch (err) { console.error('Voice error:', err); }
+          } catch (err) {
+            console.error('Voice error:', err);
+            setSendError('The voice note could not be sent. Please try again.');
+          }
           finally { setIsUploading(false); setLiveTranscript(''); }
         };
       };
@@ -609,28 +633,44 @@ function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall
     return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
   };
 
+  // Live search across everything in the list: names and last messages.
+  const threadQuery = threadSearch.trim().toLowerCase();
+  const visibleThreads = threadQuery
+    ? threads.filter(
+        (th) =>
+          (th.participantName || '').toLowerCase().includes(threadQuery) ||
+          (th.lastMessage || '').toLowerCase().includes(threadQuery)
+      )
+    : threads;
+
   return (
     <div className="flex h-full bg-white">
       {/* Conversation List */}
       <div className={`${activeThreadId ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-80 border-r border-gray-100 flex-shrink-0`}>
         <div className="p-5 border-b border-gray-100">
-          <h2 className="text-2xl font-serif font-bold text-gray-900">Conversations</h2>
+          <h2 className="text-2xl font-serif font-bold text-gray-900">{t('conversations')}</h2>
         </div>
         <div className="px-4 py-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input type="text" placeholder="Search wisdom..." className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-burgundy/20" />
+            <input
+              type="text"
+              value={threadSearch}
+              onChange={(e) => setThreadSearch(e.target.value)}
+              placeholder={t('searchConversations')}
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-burgundy/20 min-h-[42px]"
+            />
           </div>
         </div>
         <div className="flex-1 overflow-auto">
-          {threads.length === 0 ? (
+          {visibleThreads.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center text-gray-400">
               <MessageCircle className="w-12 h-12 opacity-30 mb-3" />
-              <p className="text-sm font-medium">No conversations yet</p>
-              <p className="text-xs mt-1">Connect with mentors to start chatting</p>
+              <p className="text-sm font-medium">{threadSearch ? t('noSearchResults') : t('noConvYet')}</p>
+              <p className="text-xs mt-1">{threadSearch ? t('noSearchResultsSub') : t('noConvYetSub')}</p>
             </div>
           ) : (
-            threads.map((thread) => (
+            visibleThreads.map((thread) => (
               <button
                 key={thread.id}
                 onClick={() => setActiveThreadId(thread.id)}
@@ -739,21 +779,15 @@ function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall
                         <img src={msg.mediaUrl} alt="Shared" className="rounded-lg mb-2 max-w-full" />
                       )}
                       {msg.type === 'voice' && msg.mediaUrl && (
-                        <div className="flex items-center gap-2 mb-1">
-                          <button className={`w-8 h-8 rounded-full flex items-center justify-center ${isMine ? 'bg-white/20' : 'bg-brand-burgundy/10'}`}>
-                            <Play className={`w-4 h-4 ${isMine ? 'text-white' : 'text-brand-burgundy'}`} />
-                          </button>
-                          <div className="flex-1 h-6 flex items-center gap-0.5">
-                            {[...Array(20)].map((_, j) => (
-                              <div key={j} className={`w-1 rounded-full ${isMine ? 'bg-white/40' : 'bg-brand-burgundy/20'}`} style={{ height: `${Math.random() * 100}%` }} />
-                            ))}
-                          </div>
-                        </div>
+                        <audio src={msg.mediaUrl} controls preload="none" className="mb-1 w-56 max-w-full" />
                       )}
-                      <p className="text-sm font-serif leading-relaxed">{msg.content}</p>
+                      {(msg.type !== 'voice' || !msg.mediaUrl) && (
+                        <p className="text-sm font-serif leading-relaxed">{msg.content}</p>
+                      )}
                       <div className={`flex items-center justify-end gap-1 mt-1 ${isMine ? 'text-white/60' : 'text-gray-400'}`}>
                         <span className="text-[10px]">{formatTime(msg.createdAt)}</span>
-                        {isMine && <span className="text-[10px]">✓✓</span>}
+                        {/* One tick = sent. Two ticks only while the other person is actually online. */}
+                        {isMine && <span className="text-[10px]">{onlineUsers.includes(activeThread.id) ? '✓✓' : '✓'}</span>}
                       </div>
                     </div>
                   </div>
@@ -763,15 +797,40 @@ function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall
             </div>
 
             {/* Input Bar */}
-            <form onSubmit={handleSendMessage} className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 bg-white" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+            <div className="relative border-t border-gray-100 bg-white">
+              {sendError && (
+                <p className="px-4 pt-2 text-sm font-semibold text-red-500">{sendError}</p>
+              )}
+              {showEmoji && (
+                <div className="absolute bottom-full left-2 z-20 mb-2 grid w-72 max-w-[calc(100vw-2rem)] grid-cols-8 gap-0.5 rounded-2xl border border-gray-100 bg-white p-2.5 shadow-xl">
+                  {CHAT_EMOJIS.map((emo) => (
+                    <button
+                      key={emo}
+                      type="button"
+                      onClick={() => setInputText((t) => t + emo)}
+                      className="rounded-lg p-1 text-xl hover:bg-gray-100"
+                    >
+                      {emo}
+                    </button>
+                  ))}
+                </div>
+              )}
+            <form onSubmit={handleSendMessage} className="flex items-center gap-2 px-4 py-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
               <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-gray-400 hover:text-gray-600"><Paperclip className="w-5 h-5" /></button>
-              <button type="button" className="p-2 text-gray-400 hover:text-gray-600"><Smile className="w-5 h-5" /></button>
+              <button
+                type="button"
+                onClick={() => setShowEmoji((v) => !v)}
+                aria-label="Add emoji"
+                className={`p-2 transition-colors ${showEmoji ? 'text-brand-burgundy' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                <Smile className="w-5 h-5" />
+              </button>
               <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageUpload} />
               <input
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Write a message..."
+                placeholder={t('typeMessage')}
                 className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-burgundy/20 min-h-[44px]"
                 disabled={isUploading}
               />
@@ -782,6 +841,7 @@ function MessagesContent({ currentUser, chatTarget, onConsumeTarget, onStartCall
               )}
               <button type="submit" disabled={!inputText.trim() || isUploading} className="p-2.5 bg-brand-burgundy text-white rounded-full disabled:opacity-40 hover:bg-opacity-90 transition-all"><Send className="w-4 h-4" /></button>
             </form>
+            </div>
           </div>
 
           {/* User Profile Panel (desktop) */}
@@ -903,6 +963,13 @@ const POST_CATEGORIES = [
 
 // Statuses live in the posts table with type='status' and disappear after 24h.
 const STATUS_TTL_MS = 24 * 60 * 60 * 1000;
+
+// Quick-pick emojis for the chat composer.
+const CHAT_EMOJIS = [
+  '😀', '😂', '🥰', '😍', '😊', '😅', '🤗', '😮',
+  '👍', '👏', '🙏', '🤝', '💪', '🙌', '✨', '💯',
+  '❤️', '🎉', '🔥', '🌱', '☀️', '🎂', '🍲', '😢',
+];
 
 function HomeContent({ userName, userAvatar, currentUser, isNewUser = false, onStartRecording, onBrowseArchive, onOpenProfile }) {
   const { t } = useLanguage();
@@ -1271,7 +1338,9 @@ function HomeContent({ userName, userAvatar, currentUser, isNewUser = false, onS
       )}
 
       {/* Welcome card */}
-      <div className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+      <div className="relative overflow-hidden bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+        <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 rounded-full bg-brand-burgundy/[0.05]" />
+        <div className="pointer-events-none absolute -bottom-24 -left-16 w-48 h-48 rounded-full bg-amber-400/[0.06]" />
         <p className="text-xs font-bold uppercase tracking-[0.15em] text-brand-burgundy">
           {isNewUser ? t('welcomeNew') : t('welcomeBack')}
         </p>
@@ -1480,7 +1549,7 @@ function HomeContent({ userName, userAvatar, currentUser, isNewUser = false, onS
       {/* Feed */}
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="w-8 h-8 border-2 border-brand-burgundy/20 border-t-brand-burgundy rounded-full animate-spin" />
+          <BrandLoader size="sm" />
         </div>
       ) : error ? (
         <EmptyState icon={X} title="Couldn't load the feed" subtitle={error} action={{ label: 'Try again', onClick: loadFeed }} />
@@ -1491,15 +1560,17 @@ function HomeContent({ userName, userAvatar, currentUser, isNewUser = false, onS
           {visibleFeed.map((post) => {
             const isMine = post.author_id === currentUser?.id;
             return (
-              <article key={post.id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+              <article key={post.id} className="bg-white border border-gray-100 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => onOpenProfile?.(post.author_id)} className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-80 transition">
-                    <Avatar name={post.author_name} avatar={post.avatar_url} size="w-10 h-10" />
+                  <button onClick={() => onOpenProfile?.(post.author_id)} className="flex items-center gap-3 min-w-0 flex-1 text-left active:opacity-70 hover:opacity-80 transition">
+                    <span className="rounded-full ring-2 ring-brand-burgundy/10 ring-offset-2 flex-shrink-0">
+                      <Avatar name={post.author_name} avatar={post.avatar_url} size="w-10 h-10" />
+                    </span>
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-gray-900 text-sm truncate">
                         {post.author_name || 'Community member'}{isMine && <span className="text-gray-400 font-normal"> · You</span>}
                       </p>
-                      <p className="text-[11px] text-gray-400">
+                      <p className="text-[11px] text-gray-400 tracking-wide">
                         {post.identity || 'Member'} · {timeAgo(post.created_at)}
                       </p>
                     </div>
@@ -1517,32 +1588,32 @@ function HomeContent({ userName, userAvatar, currentUser, isNewUser = false, onS
                     )}
                   </div>
                 </div>
-                <p className="text-sm text-gray-700 font-serif leading-relaxed whitespace-pre-wrap mt-3">{post.body || post.title}</p>
+                <p className="text-[15px] text-gray-700 font-serif leading-relaxed whitespace-pre-wrap mt-3">{post.body || post.title}</p>
                 {post.media_url && (
-                  <div className="mt-3">
+                  <div className="mt-3 -mx-4 sm:mx-0">
                     {post.type === 'audio_archive' || post.type === 'voice' ? (
-                      <audio src={post.media_url} controls className="w-full" />
+                      <div className="mx-4 sm:mx-0"><audio src={post.media_url} controls className="w-full" /></div>
                     ) : (
-                      <img src={post.media_url} alt="" className="rounded-xl max-h-[420px] w-full object-cover" />
+                      <img src={post.media_url} alt="" loading="lazy" className="sm:rounded-2xl max-h-[480px] w-full object-cover sm:border sm:border-gray-100" />
                     )}
                   </div>
                 )}
 
                 {/* Post actions */}
-                <div className="mt-4 pt-3 border-t border-gray-50 flex items-center gap-5">
+                <div className="mt-3 pt-2 border-t border-gray-50 flex items-center gap-2">
                   <button
                     onClick={() => handleLike(post)}
-                    className={`flex items-center gap-1.5 text-sm font-semibold transition-colors min-h-[36px] ${
-                      post.liked_by_me ? 'text-red-500' : 'text-gray-400 hover:text-red-400'
+                    className={`flex items-center gap-1.5 text-sm font-semibold rounded-full px-3.5 py-2 transition-all min-h-[40px] ${
+                      post.liked_by_me ? 'text-red-500 bg-red-50' : 'text-gray-400 hover:text-red-400 hover:bg-red-50/60'
                     }`}
                   >
-                    <Heart className={`w-[18px] h-[18px] ${post.liked_by_me ? 'fill-red-500' : ''}`} />
+                    <Heart className={`w-[18px] h-[18px] transition-transform ${post.liked_by_me ? 'fill-red-500 scale-110' : ''}`} />
                     {post.like_count || 0}
                   </button>
                   <button
                     onClick={() => setOpenCommentsId((id) => (id === post.id ? null : post.id))}
-                    className={`flex items-center gap-1.5 text-sm font-semibold transition-colors min-h-[36px] ${
-                      openCommentsId === post.id ? 'text-brand-burgundy' : 'text-gray-400 hover:text-brand-burgundy'
+                    className={`flex items-center gap-1.5 text-sm font-semibold rounded-full px-3.5 py-2 transition-all min-h-[40px] ${
+                      openCommentsId === post.id ? 'text-brand-burgundy bg-brand-burgundy/5' : 'text-gray-400 hover:text-brand-burgundy hover:bg-brand-burgundy/5'
                     }`}
                   >
                     <MessageCircle className="w-[18px] h-[18px]" />
@@ -1640,20 +1711,20 @@ function ArchiveContent({ onCreateStory, onCreateArticle, onRecord }) {
           </button>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
           <button
             onClick={() => {setActiveTab('stories'); setSearchTerm('');}}
-            className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] ${
+            className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] whitespace-nowrap flex-shrink-0 ${
               activeTab === 'stories'
                 ? 'bg-brand-burgundy text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            <BookOpen className="w-4 h-4" strokeWidth={1.75} /> Stories
+            <BookOpen className="w-4 h-4" strokeWidth={1.75} /> {t('storiesTab')}
           </button>
           <button
             onClick={() => {setActiveTab('oral'); setSearchTerm('');}}
-            className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] ${
+            className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] whitespace-nowrap flex-shrink-0 ${
               activeTab === 'oral'
                 ? 'bg-brand-burgundy text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -1663,13 +1734,13 @@ function ArchiveContent({ onCreateStory, onCreateArticle, onRecord }) {
           </button>
           <button
             onClick={() => {setActiveTab('library'); setSearchTerm('');}}
-            className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] ${
+            className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] whitespace-nowrap flex-shrink-0 ${
               activeTab === 'library'
                 ? 'bg-brand-burgundy text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            <Library className="w-4 h-4" strokeWidth={1.75} /> Library
+            <Library className="w-4 h-4" strokeWidth={1.75} /> {t('libraryTab')}
           </button>
         </div>
 
@@ -1678,7 +1749,7 @@ function ArchiveContent({ onCreateStory, onCreateArticle, onRecord }) {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search stories, articles..."
+            placeholder={t('searchArchive')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-4 py-3 md:py-2.5 bg-white border border-gray-200 rounded-full text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-brand-burgundy/20 min-h-[48px] md:min-h-auto"
@@ -1690,7 +1761,7 @@ function ArchiveContent({ onCreateStory, onCreateArticle, onRecord }) {
       {loading ? (
         <div className="flex items-center justify-center py-20 md:py-16">
           <div className="text-center">
-            <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-brand-burgundy animate-spin mx-auto mb-4" />
+            <div className="mb-4 flex justify-center"><BrandLoader /></div>
             <p className="text-gray-500 text-lg">Loading {activeTab}...</p>
           </div>
         </div>
@@ -1868,6 +1939,7 @@ function PostDetail({ post, contentType = 'story', onBack }) {
 
 /* ============ SETTINGS TAB ============ */
 function SettingsContent({ userName, userEmail, appUser, onLogout, language, changeLanguage, auth, darkMode = false, onToggleDark }) {
+  const { t } = useLanguage();
   const [settingsTab, setSettingsTab] = useState('profile'); // profile | moderation
   const [profile, setProfile] = useState({
     displayName: userName || '',
@@ -1933,7 +2005,7 @@ function SettingsContent({ userName, userEmail, appUser, onLogout, language, cha
       {/* Profile Tab */}
       {settingsTab === 'profile' && (
       <div>
-      <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
+      <div className="bg-white rounded-2xl p-5 sm:p-8 shadow-sm border border-gray-100 mb-6">
         <h2 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h2>
         <div className="flex items-center gap-4 mb-6">
           <div className="w-20 h-20 rounded-full bg-brand-burgundy flex items-center justify-center text-white font-bold text-2xl overflow-hidden flex-shrink-0">
@@ -1977,19 +2049,19 @@ function SettingsContent({ userName, userEmail, appUser, onLogout, language, cha
             </div>
           </div>
           <button onClick={handleSave} disabled={saving} className="w-full bg-brand-burgundy text-white font-bold py-3 rounded-xl hover:bg-opacity-90 transition-all min-h-[48px] disabled:opacity-50">
-            {saving ? 'Saving...' : saved ? '✓ Saved!' : 'Save Changes'}
+            {saving ? t('saving') : saved ? '✓' : t('saveChanges')}
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Preferences</h2>
+      <div className="bg-white rounded-2xl p-5 sm:p-8 shadow-sm border border-gray-100 mb-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">{t('preferences')}</h2>
         <div className="space-y-4">
           {/* Language */}
           <div className="flex items-center justify-between py-4 border-b border-gray-200">
             <div>
-              <p className="font-medium text-gray-900">Language</p>
-              <p className="text-sm text-gray-500">Choose your preferred language</p>
+              <p className="font-medium text-gray-900">{t('languageLabel')}</p>
+              <p className="text-sm text-gray-500">{t('languageDesc')}</p>
             </div>
             <select
               value={language}
@@ -2007,8 +2079,8 @@ function SettingsContent({ userName, userEmail, appUser, onLogout, language, cha
           {/* Dark theme — reachable on mobile where the sidebar toggle isn't */}
           <div className="flex items-center justify-between py-4 border-b border-gray-200">
             <div>
-              <p className="font-medium text-gray-900">Dark theme</p>
-              <p className="text-sm text-gray-500">Easier on the eyes at night</p>
+              <p className="font-medium text-gray-900">{t('darkTheme')}</p>
+              <p className="text-sm text-gray-500">{t('darkThemeDesc')}</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" checked={darkMode} onChange={onToggleDark} className="sr-only peer" />
@@ -2033,14 +2105,14 @@ function SettingsContent({ userName, userEmail, appUser, onLogout, language, cha
 
       <button onClick={onLogout} className="w-full flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-600 font-semibold py-3 rounded-xl hover:bg-gray-50 transition-colors min-h-[48px]">
         <LogOut className="w-5 h-5" />
-        Logout
+        {t('signOut')}
       </button>
       </div>
       )}
 
       {/* Moderation Tab */}
       {settingsTab === 'moderation' && (
-        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-2xl p-5 sm:p-8 shadow-sm border border-gray-100">
           <ModerationDashboard />
         </div>
       )}
@@ -2160,9 +2232,9 @@ function MentorshipContent({ currentUser, onOpenChat, onStartCall, onlineUsers =
   ];
 
   const tabs = [
-    { id: 'discover', label: 'Discover' },
+    { id: 'discover', label: 'Discover Mentors and Mentees' },
     { id: 'requests', label: 'Requests', count: pendingRequests.length },
-    { id: 'circle', label: 'My Circle', count: connections.length },
+    { id: 'circle', label: 'My Connections', count: connections.length },
   ];
 
   return (
@@ -2228,7 +2300,7 @@ function MentorshipContent({ currentUser, onOpenChat, onStartCall, onlineUsers =
 
           {loading ? (
             <div className="flex justify-center py-16">
-              <div className="w-8 h-8 border-2 border-brand-burgundy/20 border-t-brand-burgundy rounded-full animate-spin" />
+              <BrandLoader size="sm" />
             </div>
           ) : error ? (
             <EmptyState
