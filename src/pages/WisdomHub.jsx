@@ -6,7 +6,10 @@ import { useLanguage } from '../context/LanguageContext';
 import { getThreads, getMessages, sendMessage, uploadChatMedia, getRecommendations, getAllUsers, requestConnection, getPendingRequests, acceptConnection, rejectConnection, getAcceptedConnections, getFeed, createPost, getStories, getLibrary, getPointsSummary, togglePostLike, getPublicProfile } from '../services/apiService';
 import BadgeDisplay from '../components/BadgeDisplay';
 import { compressImage, fileToDataUrl, blobToDataUrl } from '../utils/imageUtils';
+<<<<<<< HEAD
 import BrandLoader from '../components/BrandLoader';
+=======
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
 import { updateProfile } from '../services/authService';
 import NotificationBell from '../components/NotificationBell';
 import VideoCall, { makeRoomName } from '../components/VideoCall';
@@ -129,10 +132,17 @@ export default function WisdomHub() {
       {/* Sidebar — Desktop only. Collapses to an icon rail while scrolling. */}
       <div className={`hidden md:flex bg-white border-r border-gray-100 flex-col flex-shrink-0 transition-all duration-300 ${sidebarOpen ? 'md:w-56' : 'md:w-[4.5rem]'}`}>
         <div className={`py-5 flex items-center gap-2 ${sidebarOpen ? 'px-5' : 'px-0 justify-center'}`}>
+<<<<<<< HEAD
           <img src={logoXZ} alt="XZ" className="w-10 h-10 flex-shrink-0" />
           {sidebarOpen && (
             <div className="overflow-hidden whitespace-nowrap">
               <h1 className="text-lg font-serif font-bold text-brand-burgundy leading-none">Digital Roots</h1>
+=======
+          <img src={logoXZ} alt="XZ" className="w-7 h-7 flex-shrink-0" />
+          {sidebarOpen && (
+            <div className="overflow-hidden whitespace-nowrap">
+              <h1 className="text-base font-serif font-bold text-brand-burgundy leading-none">Digital Roots</h1>
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
               <p className="text-[10px] text-gray-400 mt-0.5">Bridging Generations</p>
             </div>
           )}
@@ -198,15 +208,25 @@ export default function WisdomHub() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0 md:pb-0 pb-20">
         {/* Header */}
+<<<<<<< HEAD
         <div className="bg-gradient-to-r from-brand-burgundy to-[#4A0602] md:bg-none md:bg-[#FBF9F8] px-4 py-3 flex items-center justify-between gap-3 border-b border-black/10 md:border-gray-100/50 shadow-sm md:shadow-none">
           <div className="flex-1 flex items-center gap-2.5 min-w-0">
             <img src={logoXZ} alt="XZ" className="w-9 h-9 md:hidden flex-shrink-0" />
             <span className="md:hidden font-serif font-bold text-white text-lg tracking-tight truncate">Digital Roots</span>
+=======
+        <div className="bg-brand-burgundy px-4 py-3 flex items-center justify-between gap-3 border-b border-gray-100/50 md:bg-[#FBF9F8]">
+          <div className="flex-1">
+            <img src={logoXZ} alt="XZ" className="w-6 h-6 md:hidden" />
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
             <h1 className="hidden md:block text-lg font-serif font-bold text-brand-burgundy">{navItems.find((n) => n.id === activeTab)?.label || 'Digital Roots'}</h1>
           </div>
           <div className="flex items-center gap-2">
             <NotificationBell />
+<<<<<<< HEAD
             <button onClick={() => setActiveTab('settings')} className="w-10 h-10 bg-white md:bg-brand-burgundy rounded-full flex items-center justify-center text-brand-burgundy md:text-white font-bold text-sm overflow-hidden min-h-[44px] ring-2 ring-white/25 md:ring-0">
+=======
+            <button onClick={() => setActiveTab('settings')} className="w-10 h-10 bg-white md:bg-brand-burgundy rounded-full flex items-center justify-center text-brand-burgundy md:text-white font-bold text-sm overflow-hidden min-h-[44px]">
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
               {userAvatar ? (
                 <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
               ) : (
@@ -343,7 +363,11 @@ function UserProfileModal({ userId, isSelf, onClose, onMessage }) {
           <p className="text-sm text-gray-500 text-center py-10">{t('profileLoadFailed')}</p>
         ) : !profile ? (
           <div className="flex justify-center py-14">
+<<<<<<< HEAD
             <BrandLoader size="sm" />
+=======
+            <div className="w-8 h-8 border-2 border-brand-burgundy/20 border-t-brand-burgundy rounded-full animate-spin" />
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
           </div>
         ) : (
           <div className="text-center">
@@ -964,6 +988,7 @@ const POST_CATEGORIES = [
 // Statuses live in the posts table with type='status' and disappear after 24h.
 const STATUS_TTL_MS = 24 * 60 * 60 * 1000;
 
+<<<<<<< HEAD
 // Quick-pick emojis for the chat composer.
 const CHAT_EMOJIS = [
   '😀', '😂', '🥰', '😍', '😊', '😅', '🤗', '😮',
@@ -971,6 +996,8 @@ const CHAT_EMOJIS = [
   '❤️', '🎉', '🔥', '🌱', '☀️', '🎂', '🍲', '😢',
 ];
 
+=======
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
 function HomeContent({ userName, userAvatar, currentUser, isNewUser = false, onStartRecording, onBrowseArchive, onOpenProfile }) {
   const { t } = useLanguage();
   const firstName = userName?.split(' ')[0] || 'Friend';
@@ -1338,9 +1365,13 @@ function HomeContent({ userName, userAvatar, currentUser, isNewUser = false, onS
       )}
 
       {/* Welcome card */}
+<<<<<<< HEAD
       <div className="relative overflow-hidden bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm">
         <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 rounded-full bg-brand-burgundy/[0.05]" />
         <div className="pointer-events-none absolute -bottom-24 -left-16 w-48 h-48 rounded-full bg-amber-400/[0.06]" />
+=======
+      <div className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
         <p className="text-xs font-bold uppercase tracking-[0.15em] text-brand-burgundy">
           {isNewUser ? t('welcomeNew') : t('welcomeBack')}
         </p>
@@ -1562,15 +1593,24 @@ function HomeContent({ userName, userAvatar, currentUser, isNewUser = false, onS
             return (
               <article key={post.id} className="bg-white border border-gray-100 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md">
                 <div className="flex items-center gap-3">
+<<<<<<< HEAD
                   <button onClick={() => onOpenProfile?.(post.author_id)} className="flex items-center gap-3 min-w-0 flex-1 text-left active:opacity-70 hover:opacity-80 transition">
                     <span className="rounded-full ring-2 ring-brand-burgundy/10 ring-offset-2 flex-shrink-0">
                       <Avatar name={post.author_name} avatar={post.avatar_url} size="w-10 h-10" />
                     </span>
+=======
+                  <button onClick={() => onOpenProfile?.(post.author_id)} className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-80 transition">
+                    <Avatar name={post.author_name} avatar={post.avatar_url} size="w-10 h-10" />
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-gray-900 text-sm truncate">
                         {post.author_name || 'Community member'}{isMine && <span className="text-gray-400 font-normal"> · You</span>}
                       </p>
+<<<<<<< HEAD
                       <p className="text-[11px] text-gray-400 tracking-wide">
+=======
+                      <p className="text-[11px] text-gray-400">
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
                         {post.identity || 'Member'} · {timeAgo(post.created_at)}
                       </p>
                     </div>
@@ -1600,6 +1640,7 @@ function HomeContent({ userName, userAvatar, currentUser, isNewUser = false, onS
                 )}
 
                 {/* Post actions */}
+<<<<<<< HEAD
                 <div className="mt-3 pt-2 border-t border-gray-50 flex items-center gap-2">
                   <button
                     onClick={() => handleLike(post)}
@@ -1608,12 +1649,27 @@ function HomeContent({ userName, userAvatar, currentUser, isNewUser = false, onS
                     }`}
                   >
                     <Heart className={`w-[18px] h-[18px] transition-transform ${post.liked_by_me ? 'fill-red-500 scale-110' : ''}`} />
+=======
+                <div className="mt-4 pt-3 border-t border-gray-50 flex items-center gap-5">
+                  <button
+                    onClick={() => handleLike(post)}
+                    className={`flex items-center gap-1.5 text-sm font-semibold transition-colors min-h-[36px] ${
+                      post.liked_by_me ? 'text-red-500' : 'text-gray-400 hover:text-red-400'
+                    }`}
+                  >
+                    <Heart className={`w-[18px] h-[18px] ${post.liked_by_me ? 'fill-red-500' : ''}`} />
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
                     {post.like_count || 0}
                   </button>
                   <button
                     onClick={() => setOpenCommentsId((id) => (id === post.id ? null : post.id))}
+<<<<<<< HEAD
                     className={`flex items-center gap-1.5 text-sm font-semibold rounded-full px-3.5 py-2 transition-all min-h-[40px] ${
                       openCommentsId === post.id ? 'text-brand-burgundy bg-brand-burgundy/5' : 'text-gray-400 hover:text-brand-burgundy hover:bg-brand-burgundy/5'
+=======
+                    className={`flex items-center gap-1.5 text-sm font-semibold transition-colors min-h-[36px] ${
+                      openCommentsId === post.id ? 'text-brand-burgundy' : 'text-gray-400 hover:text-brand-burgundy'
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
                     }`}
                   >
                     <MessageCircle className="w-[18px] h-[18px]" />
@@ -1725,6 +1781,16 @@ function ArchiveContent({ onCreateStory, onCreateArticle, onRecord }) {
           <button
             onClick={() => {setActiveTab('oral'); setSearchTerm('');}}
             className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] whitespace-nowrap flex-shrink-0 ${
+              activeTab === 'oral'
+                ? 'bg-brand-burgundy text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            <Mic className="w-4 h-4" strokeWidth={1.75} /> {t('oralArchive')}
+          </button>
+          <button
+            onClick={() => {setActiveTab('oral'); setSearchTerm('');}}
+            className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all min-h-[44px] ${
               activeTab === 'oral'
                 ? 'bg-brand-burgundy text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -1939,7 +2005,10 @@ function PostDetail({ post, contentType = 'story', onBack }) {
 
 /* ============ SETTINGS TAB ============ */
 function SettingsContent({ userName, userEmail, appUser, onLogout, language, changeLanguage, auth, darkMode = false, onToggleDark }) {
+<<<<<<< HEAD
   const { t } = useLanguage();
+=======
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
   const [settingsTab, setSettingsTab] = useState('profile'); // profile | moderation
   const [profile, setProfile] = useState({
     displayName: userName || '',
@@ -2079,8 +2148,13 @@ function SettingsContent({ userName, userEmail, appUser, onLogout, language, cha
           {/* Dark theme — reachable on mobile where the sidebar toggle isn't */}
           <div className="flex items-center justify-between py-4 border-b border-gray-200">
             <div>
+<<<<<<< HEAD
               <p className="font-medium text-gray-900">{t('darkTheme')}</p>
               <p className="text-sm text-gray-500">{t('darkThemeDesc')}</p>
+=======
+              <p className="font-medium text-gray-900">Dark theme</p>
+              <p className="text-sm text-gray-500">Easier on the eyes at night</p>
+>>>>>>> b2021ffcc93ca5e5b22de55256ab3dd91726354b
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" checked={darkMode} onChange={onToggleDark} className="sr-only peer" />
