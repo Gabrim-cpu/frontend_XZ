@@ -30,36 +30,60 @@ export default function ChatMessaging({ currentUser }) {
 
   // 1. Initialize WebSocket socket.io client
   useEffect(() => {
-    const socket = io(SOCKET_URL);
+    if (!currentUser?.id) {
+      console.log('⏳ Waiting for currentUser...');
+      return;
+    }
+
+    console.log('🔌 Initializing Socket.io connection to:', SOCKET_URL);
+
+    const socket = io(SOCKET_URL, {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 10,
+      transports: ['websocket', 'polling'],
+    });
+
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("🔌 Connected to Chat WebSocket");
+      console.log("✅ Socket.io connected. Socket ID:", socket.id);
       setSocketConnected(true);
-      if (currentUser?.id) {
-        socket.emit("join", currentUser.id);
-      }
+      // Join room with user ID so others can send messages to this user
+      socket.emit("join", currentUser.id);
+      console.log("📍 Joined room:", currentUser.id);
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", (reason) => {
+      console.log("❌ Socket.io disconnected. Reason:", reason);
+      setSocketConnected(false);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("❌ Socket.io connection error:", error);
       setSocketConnected(false);
     });
 
     // Listen to real-time incoming messages
     socket.on("message", (msg) => {
+      console.log("📨 Received real-time message:", msg);
+
       // If message is for the currently open thread, add to message list
       if (msg.senderId === activeThreadId || msg.receiverId === activeThreadId) {
+        console.log("✅ Message is for active thread, adding to list");
         setMessages((prev) => [...prev, msg]);
       }
-      
+
       // Refresh threads list to update last message preview
       fetchThreads();
     });
 
     return () => {
+      console.log("🧹 Cleaning up Socket.io connection");
       socket.disconnect();
     };
-  }, [currentUser, activeThreadId]);
+  }, [currentUser?.id]);
 
   // 2. Fetch all threads
   const fetchThreads = async () => {

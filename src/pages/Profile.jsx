@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile } from '../services/authService';
 import { Upload, X, Check, ArrowRight } from 'lucide-react';
+import BackgroundPattern from '../components/BackgroundPattern';
 import { compressImage } from '../utils/imageUtils';
 import logoXZ from '../Assets/logo_XZ-removebg-preview.png';
 
@@ -89,12 +90,13 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
-      <header className="flex items-center gap-3 px-6 py-6 lg:px-16 border-b border-gray-100">
+      <BackgroundPattern />
+      <header className="flex items-center gap-3 px-6 py-6 lg:px-16 border-b border-gray-100 relative z-10">
         <img src={logoXZ} alt="XZ" className="h-8 w-8" />
         <span className="text-lg font-bold text-brand-burgundy">XZ</span>
       </header>
 
-      <div className="flex-1 flex flex-col items-center justify-start px-6 py-8 max-w-2xl mx-auto w-full">
+      <div className="flex-1 flex flex-col items-center justify-start px-6 py-8 max-w-2xl mx-auto w-full relative z-10">
         <div className="w-full bg-white rounded-3xl shadow-lg p-6 sm:p-8 space-y-6">
           <div>
             <h1 className="text-3xl font-bold text-brand-burgundy mb-2">Complete Your Profile</h1>

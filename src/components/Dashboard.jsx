@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import BackgroundPattern from './BackgroundPattern';
 import logo from '../Assets/logo_XZ-removebg-preview.png';
 import BadgeDisplay from './BadgeDisplay';
 import Leaderboard from './Leaderboard';
@@ -213,6 +214,7 @@ export default function Dashboard({ feed = [], recommendations = [], pointsSumma
 
   return (
     <div className="min-h-screen bg-[#F8F7F4] text-stone-900" style={{ fontFamily: '"Poppins", sans-serif', paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}>
+      <BackgroundPattern />
 
       {/* Mobile Header */}
       <header className="sticky top-0 z-40 border-b px-4 py-3 backdrop-blur md:hidden border-stone-200 bg-white/95" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>

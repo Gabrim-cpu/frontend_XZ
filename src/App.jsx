@@ -6,6 +6,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import ChatMessaging from './components/ChatMessaging';
 import RecordingSession from './components/RecordingSession';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 import Register from './pages/Register';
 import Landing from './pages/Landing';
 import BrandLoader from './components/BrandLoader';
@@ -105,6 +106,7 @@ function MessagesPage() {
 export default function App() {
   return (
     <LanguageProvider>
+      <PWAInstallPrompt />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />

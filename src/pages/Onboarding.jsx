@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile } from '../services/authService';
 import { ArrowRight, Check, Upload, X, BookOpen, Users } from 'lucide-react';
+import BackgroundPattern from '../components/BackgroundPattern';
 import logoXZ from '../Assets/logo_XZ-removebg-preview.png';
 
 const nicheFields = ['history', 'sociology', 'anthropology', 'literature', 'philosophy', 'technology', 'arts', 'music', 'cooking', 'crafts'];
@@ -76,7 +77,8 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-screen bg-brand-bgLight flex flex-col" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
-      <div className="flex-1 flex flex-col items-center justify-start px-6 py-8 max-w-lg mx-auto w-full">
+      <BackgroundPattern />
+      <div className="flex-1 flex flex-col items-center justify-start px-6 py-8 max-w-lg mx-auto w-full relative z-10">
 
         {/* Logo */}
         <div className="flex items-center gap-2 mb-6">

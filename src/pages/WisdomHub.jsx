@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Home, MessageCircle, BookOpen, Users, Settings as SettingsIcon, LogOut, Search, Bell, HelpCircle, Plus, Diamond, Send, Mic, Paperclip, Smile, Phone, Video, MoreVertical, Square, Play, Check, UserPlus, Clock, Sparkles, Library, User, Shield, Star, Award, Image as ImageIcon, ArrowRight, Moon, Sun, Heart, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import BackgroundPattern from '../components/BackgroundPattern';
 import { getThreads, getMessages, sendMessage, uploadChatMedia, getRecommendations, getAllUsers, requestConnection, getPendingRequests, acceptConnection, rejectConnection, getAcceptedConnections, getFeed, createPost, getStories, getLibrary, getPointsSummary, togglePostLike, getPublicProfile } from '../services/apiService';
 import BadgeDisplay from '../components/BadgeDisplay';
 import { compressImage, fileToDataUrl, blobToDataUrl } from '../utils/imageUtils';
@@ -126,6 +127,7 @@ export default function WisdomHub() {
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-[#FBF9F8]" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <BackgroundPattern />
       {/* Sidebar — Desktop only. Collapses to an icon rail while scrolling. */}
       <div className={`hidden md:flex bg-white border-r border-gray-100 flex-col flex-shrink-0 transition-all duration-300 ${sidebarOpen ? 'md:w-56' : 'md:w-[4.5rem]'}`}>
         <div className={`py-5 flex items-center gap-2 ${sidebarOpen ? 'px-5' : 'px-0 justify-center'}`}>

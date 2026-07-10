@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import BackgroundPattern from '../components/BackgroundPattern';
 import logoXZ from '../Assets/logo_XZ-removebg-preview.png';
 import { signInWithGoogle, syncSession } from '../services/authService';
 
@@ -97,12 +98,27 @@ export default function Register() {
     setError('');
     setSubmitting(true);
     try {
+      console.log('📱 Step 1: Starting Google sign-in...');
       const user = await signInWithGoogle();
-      if (!user) return;
+      if (!user) {
+        console.log('📱 Step 1: User cancelled Google sign-in');
+        return;
+      }
+      console.log('✅ Step 1: Google sign-in successful for:', user.email);
+
+      console.log('📱 Step 2: Getting ID token...');
       const idToken = await user.getIdToken();
+      console.log('✅ Step 2: ID token obtained');
+
+      console.log('📱 Step 3: Syncing session with backend...');
       const session = await syncSession(idToken, { language });
-      navigate(session.isNewUser || !session.user?.is_onboarded ? '/profile' : '/dashboard');
+      console.log('✅ Step 3: Session synced. Response:', session);
+
+      const redirectPath = session.isNewUser || !session.user?.is_onboarded ? '/profile' : '/dashboard';
+      console.log('📱 Step 4: Redirecting to:', redirectPath);
+      navigate(redirectPath);
     } catch (err) {
+      console.error('❌ Google sign-up error:', err);
       setError(friendlyError(err));
     } finally {
       setSubmitting(false);
@@ -111,8 +127,9 @@ export default function Register() {
 
   return (
     <div className="min-h-[100dvh] w-full flex bg-white">
+      <BackgroundPattern />
       {/* LEFT — form */}
-      <div className="flex-1 lg:w-1/2 flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="flex-1 lg:w-1/2 flex flex-col relative z-10" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <header className="flex items-center justify-between px-4 sm:px-6 lg:px-10 pt-4">
           <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition lg:hidden">
             <img src={logoXZ} alt="XZ" className="h-16 w-16" />
@@ -146,9 +163,9 @@ export default function Register() {
               type="button"
               onClick={handleGoogleSignUp}
               disabled={submitting}
-              className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 rounded-2xl py-3 px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all min-h-[48px] disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-3 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl py-4 px-6 text-base font-bold text-white hover:from-blue-700 hover:to-blue-800 transition-all min-h-[56px] shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:shadow-md"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z" />
                 <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z" />
                 <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z" />
@@ -174,7 +191,7 @@ export default function Register() {
                   onChange={handleChange}
                   disabled={submitting}
                   placeholder="Your name"
-                  className="w-full mt-1 px-4 py-2.5 bg-white/80 border border-gray-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-brand-burgundy/30 focus:border-brand-burgundy min-h-[44px]"
+                  className="w-full mt-2 px-4 py-3 bg-white border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-burgundy focus:border-transparent shadow-sm hover:shadow-md transition-all min-h-[48px]"
                 />
               </div>
 
@@ -188,7 +205,7 @@ export default function Register() {
                   onChange={handleChange}
                   disabled={submitting}
                   placeholder="you@example.com"
-                  className="w-full mt-1 px-4 py-2.5 bg-white/80 border border-gray-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-brand-burgundy/30 focus:border-brand-burgundy min-h-[44px]"
+                  className="w-full mt-2 px-4 py-3 bg-white border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-burgundy focus:border-transparent shadow-sm hover:shadow-md transition-all min-h-[48px]"
                 />
               </div>
 
@@ -236,14 +253,14 @@ export default function Register() {
                   onChange={handleChange}
                   disabled={submitting}
                   placeholder="e.g. 24 or 65"
-                  className="w-full mt-1 px-4 py-2.5 bg-white/80 border border-gray-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-brand-burgundy/30 focus:border-brand-burgundy min-h-[44px]"
+                  className="w-full mt-2 px-4 py-3 bg-white border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-burgundy focus:border-transparent shadow-sm hover:shadow-md transition-all min-h-[48px]"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-brand-burgundy text-white py-3 px-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition-all min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed mt-3"
+                className="w-full bg-gradient-to-r from-brand-burgundy to-red-600 text-white py-4 px-6 rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all min-h-[56px] disabled:opacity-50 disabled:cursor-not-allowed mt-4"
               >
                 {submitting ? (
                   <>
@@ -270,7 +287,7 @@ export default function Register() {
       </div>
 
       {/* RIGHT — burgundy story panel (desktop only, mirror of the sign-in page) */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-brand-burgundy text-white overflow-hidden flex-col justify-between p-12 xl:p-16">
+      <div className="hidden lg:flex lg:w-1/2 relative z-20 bg-brand-burgundy text-white overflow-hidden flex-col justify-between p-12 xl:p-16">
         {/* Logo */}
         <button onClick={() => navigate('/')} className="relative z-10 flex items-center gap-3 hover:opacity-80 transition w-fit ml-auto">
           <img src={logoXZ} alt="XZ" className="w-16 h-16 brightness-0 invert" />

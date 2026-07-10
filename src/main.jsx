@@ -5,6 +5,7 @@ import App from './App.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
 import './index.css';
+import './styles/mobile.css';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

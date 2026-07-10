@@ -38,11 +38,57 @@ export default {
           '0%': { opacity: '0', transform: 'translateY(16px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        'slide-in-bottom': {
+          '0%': { transform: 'translateY(100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        'pulse-subtle': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.8' },
+        },
       },
       animation: {
         'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
+        'slide-in-bottom': 'slide-in-bottom 0.3s ease-out',
+        'pulse-subtle': 'pulse-subtle 3s ease-in-out infinite',
+      },
+      minHeight: {
+        'touch-target': '44px',
+        'touch-target-large': '48px',
+      },
+      minWidth: {
+        'touch-target': '44px',
+        'touch-target-large': '48px',
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      addUtilities({
+        '.touch-none': {
+          '-webkit-touch-callout': 'none',
+          '-webkit-user-select': 'none',
+          'user-select': 'none',
+        },
+        '.safe-area-padding': {
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingRight: 'env(safe-area-inset-right)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          paddingLeft: 'env(safe-area-inset-left)',
+        },
+        '.safe-area-padding-top': {
+          paddingTop: 'env(safe-area-inset-top)',
+        },
+        '.safe-area-padding-bottom': {
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        },
+        '.safe-area-margin-bottom': {
+          marginBottom: 'env(safe-area-inset-bottom)',
+        },
+        '.vibrate-on-tap': {
+          '-webkit-tap-highlight-color': 'rgba(0, 0, 0, 0.1)',
+        },
+      })
+    }
+  ],
 }

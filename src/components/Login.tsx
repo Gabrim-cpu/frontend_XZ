@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { signInWithGoogle, syncSession, resetPassword } from '../services/authService';
+import BackgroundPattern from './BackgroundPattern';
 import logoXZ from '../Assets/logo_XZ-removebg-preview.png';
 
 interface LoginFormData {
@@ -108,8 +109,9 @@ export default function Login() {
 
   return (
     <div className="min-h-[100dvh] w-full flex bg-white">
+      <BackgroundPattern />
       {/* LEFT PANEL — burgundy story panel (desktop only) */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-brand-burgundy text-white overflow-hidden flex-col justify-between p-12 xl:p-16">
+      <div className="hidden lg:flex lg:w-1/2 relative z-20 bg-brand-burgundy text-white overflow-hidden flex-col justify-between p-12 xl:p-16">
         {/* Logo */}
         <button onClick={() => navigate('/')} className="relative z-10 flex items-center gap-3 hover:opacity-80 transition w-fit">
           <img src={logoXZ} alt="XZ" className="w-16 h-16 brightness-0 invert" />
@@ -144,7 +146,7 @@ export default function Login() {
       </div>
 
       {/* RIGHT PANEL — form */}
-      <div className="flex-1 lg:w-1/2 flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="flex-1 lg:w-1/2 flex flex-col relative z-10" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Mobile logo header */}
         <div className="lg:hidden flex items-center justify-center pt-8 pb-2">
           <button onClick={() => navigate('/')} className="flex items-center gap-2">

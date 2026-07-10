@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronDown } from 'lucide-react';
+import BackgroundPattern from '../components/BackgroundPattern';
 import logoWhite from '../Assets/logo_blanc-removebg-preview (1).png';
 import logoRed from '../Assets/XZ_RED-removebg-preview.png';
 import laptopImg from '../Assets/intergenerational_laptop.png';
@@ -451,6 +452,7 @@ export default function Landing() {
 
   return (
     <div className="relative min-h-screen bg-white text-gray-900">
+      <BackgroundPattern />
       {/* Invisible top marker — when it leaves the viewport, the nav solidifies. */}
       <div ref={sentinelRef} aria-hidden className="absolute left-0 top-0 h-20 w-px" />
       <style>{`

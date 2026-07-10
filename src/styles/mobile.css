@@ -1,0 +1,288 @@
+/* Mobile-First Responsive Design Enhancements */
+
+/* Prevent zoom on input focus on iOS */
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
+/* Smooth scrolling on all devices */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Body safe areas for notched devices */
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Remove tap highlight on mobile */
+button,
+a,
+input[type="button"],
+input[type="submit"],
+select {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Ensure images scale properly on mobile */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Optimize video for mobile */
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Prevent zooming on input focus (iOS) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+    padding-top: max(0px, env(safe-area-inset-top));
+  }
+}
+
+/* Bottom margin for content under fixed nav */
+.with-bottom-nav {
+  margin-bottom: calc(env(safe-area-inset-bottom) + 60px);
+}
+
+/* Touch-friendly spacing for interactive elements */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .px-4 {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .gap-2 {
+    gap: 0.75rem;
+  }
+}
+
+/* Portrait orientation optimizations */
+@media (orientation: portrait) {
+  body {
+    max-width: 100vw;
+  }
+
+  .landscape-hide {
+    display: block;
+  }
+
+  .portrait-hide {
+    display: none;
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (orientation: landscape) {
+  .landscape-hide {
+    display: none;
+  }
+
+  .portrait-hide {
+    display: block;
+  }
+
+  /* Reduce vertical padding in landscape */
+  .py-6 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .py-8 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+}
+
+/* Small phone optimization (< 320px) */
+@media (max-width: 319px) {
+  body {
+    font-size: 14px;
+  }
+
+  .px-4 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Large phone optimization (320px - 480px) */
+@media (min-width: 320px) and (max-width: 480px) {
+  .text-lg {
+    font-size: 1rem;
+  }
+
+  .gap-4 {
+    gap: 0.75rem;
+  }
+}
+
+/* Tablet optimization (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .px-4 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+/* Prevent accidental selection on mobile */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+/* Prevent text-selection highlighting */
+.unselectable {
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* Optimize buttons for mobile */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  padding: 0;
+  margin: 0;
+}
+
+/* Smooth transitions on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Input styling for mobile */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+textarea,
+select {
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: none;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+/* Viewport height adjustments for mobile keyboard */
+@media (max-height: 500px) {
+  .vertical-space-lg {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .py-12 {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  textarea,
+  select {
+    background-color: #1f2937;
+    color: #f3f4f6;
+    border-color: #374151;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  button,
+  a {
+    border: 2px solid currentColor;
+  }
+
+  input,
+  textarea,
+  select {
+    border-width: 2px;
+  }
+}
+
+/* Sticky header support */
+.sticky-header {
+  position: sticky;
+  top: env(safe-area-inset-top);
+  z-index: 40;
+  background: inherit;
+}
+
+/* Sticky footer support */
+.sticky-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 30;
+}
+
+/* Content with sticky footer spacing */
+.pb-sticky-footer {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+}

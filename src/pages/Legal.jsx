@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import BackgroundPattern from '../components/BackgroundPattern';
 import logoXZ from '../Assets/XZ_RED-removebg-preview.png';
 
 // Shared shell for the legal / policy pages linked from the landing footer.
@@ -13,7 +14,8 @@ function LegalLayout({ title, updated, children }) {
 
   return (
     <div className="min-h-screen bg-[#FBF9F6]">
-      <header className="sticky top-0 z-10 border-b border-gray-100 bg-white/90 backdrop-blur-xl">
+      <BackgroundPattern />
+      <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-3 sm:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-2.5 hover:opacity-80 transition">
             <img src={logoXZ} alt="XZ" className="h-12 w-12" />
