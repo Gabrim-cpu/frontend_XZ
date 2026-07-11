@@ -26,6 +26,8 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import BackgroundPattern from './BackgroundPattern';
+import PublicProfileModal from './PublicProfileModal';
+import AvatarSelector from './AvatarSelector';
 import logo from '../Assets/logo_XZ-removebg-preview.png';
 import BadgeDisplay from './BadgeDisplay';
 import Leaderboard from './Leaderboard';
@@ -47,6 +49,7 @@ export default function Dashboard({ feed = [], recommendations = [], pointsSumma
   const [activeTab, setActiveTab] = useState('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [publicProfileUserId, setPublicProfileUserId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [composerText, setComposerText] = useState('');
   const [localFeed, setLocalFeed] = useState(feed);
@@ -54,6 +57,8 @@ export default function Dashboard({ feed = [], recommendations = [], pointsSumma
   const [pendingRequests, setPendingRequests] = useState([]);
   const [livePointsSummary, setLivePointsSummary] = useState(pointsSummary || { totalPoints: 0, badges: [] });
   const [isPublishing, setIsPublishing] = useState(false);
+  const [savedPostIds, setSavedPostIds] = useState(new Set());
+  const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState(false);
 
   const displayName = appUser?.display_name || appUser?.email?.split('@')[0] || 'User';
   const isSenior = appUser?.identity === 'Senior';
@@ -423,11 +428,11 @@ export default function Dashboard({ feed = [], recommendations = [], pointsSumma
                     <p className={`mt-4 leading-relaxed whitespace-pre-wrap ${isSenior ? 'text-base' : 'text-sm'} text-stone-700`}>{item.body || item.title}</p>
 
                     {item.media_url && (
-                      <div className="mt-4">
+                      <div className="mt-4 overflow-hidden rounded-3xl shadow-md hover:shadow-lg transition">
                         {item.type === 'audio_archive' ? (
-                          <audio src={item.media_url} controls className="w-full max-w-md h-12 accent-brand-burgundy" />
+                          <audio src={item.media_url} controls className="w-full max-w-md h-12 accent-brand-burgundy bg-stone-100" />
                         ) : (
-                          <img src={item.media_url} alt="" className="aspect-[9/16] max-h-[520px] w-full rounded-3xl object-cover" />
+                          <img src={item.media_url} alt="" className="aspect-auto max-h-96 w-full object-cover hover:scale-105 transition duration-300" />
                         )}
                       </div>
                     )}
@@ -441,7 +446,15 @@ export default function Dashboard({ feed = [], recommendations = [], pointsSumma
                         <MessageCircle className="h-5 w-5" />
                         {t('comment')}
                       </button>
-                      <button className="flex items-center gap-2 rounded-full px-4 py-2.5 min-h-[44px] hover:bg-stone-100">
+                      <button onClick={() => setSavedPostIds(prev => {
+                        const newSet = new Set(prev);
+                        newSet.has(item.id) ? newSet.delete(item.id) : newSet.add(item.id);
+                        return newSet;
+                      })} className={`flex items-center gap-2 rounded-full px-4 py-2.5 min-h-[44px] hover:bg-stone-100 ${savedPostIds.has(item.id) ? 'text-brand-burgundy' : ''}`}>
+                        <Star className={`h-5 w-5 ${savedPostIds.has(item.id) ? 'fill-current' : ''}`} />
+                        {t('save')}
+                      </button>
+                      <button className="flex items-center gap-2 rounded-full px-4 py-2.5 min-h-[44px] hover:bg-stone-100 ml-auto">
                         <Send className="h-5 w-5" />
                         {t('share')}
                       </button>
@@ -548,55 +561,53 @@ export default function Dashboard({ feed = [], recommendations = [], pointsSumma
                   </p>
                 </div>
               ) : (
-                <div className="mt-4 space-y-4">
+                <div className="mt-4 grid gap-5 md:grid-cols-2">
                   {liveRecommendations.map((item) => (
-                    <div key={item.id} className="w-full rounded-2xl p-4 text-left bg-[#FBF9F6]">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex min-w-0 items-start gap-3">
-                          <div className={`shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-burgundy font-bold text-white flex ${isSenior ? 'h-14 w-14 text-base' : 'h-11 w-11 text-sm'}`}>
+                    <div key={item.id} className="w-full rounded-2xl p-5 text-left bg-[#FBF9F6] border border-stone-200 flex flex-col">
+                      <div className="flex items-start justify-between gap-3 flex-1">
+                        <div className="flex min-w-0 flex-col items-center text-center">
+                          <button onClick={() => setPublicProfileUserId(item.id)} className={`shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-burgundy font-bold text-white flex mb-3 ring-4 ring-white hover:shadow-lg transition ${isSenior ? 'h-20 w-20 text-xl' : 'h-16 w-16 text-base'}`}>
                             {item.avatar_url ? (
                               <img src={item.avatar_url} alt={item.display_name} className="h-full w-full object-cover" />
                             ) : (
                               (item.display_name || 'U').slice(0, 1).toUpperCase()
                             )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className={`truncate font-bold ${isSenior ? 'text-base' : 'text-sm'}`}>{item.display_name}</p>
-                            <p className={`font-normal ${isSenior ? 'text-sm' : 'text-[10px]'} text-stone-500`}>
-                              {item.identity === 'Senior' ? t('senior') : t('youth')}
-                            </p>
-                            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                              <span className={`rounded-full px-3 py-1 font-bold ${isSenior ? 'text-xs' : 'text-[10px]'} bg-brand-burgundy/10 text-brand-burgundy`}>
-                                {item.compatibility_score}% {t('compatibilityScore')}
+                          </button>
+                          <p className={`truncate font-bold ${isSenior ? 'text-lg' : 'text-base'}`}>{item.display_name}</p>
+                          <p className={`font-normal ${isSenior ? 'text-sm' : 'text-xs'} text-stone-500 mt-0.5`}>
+                            {item.identity === 'Senior' ? t('senior') : t('youth')}
+                          </p>
+                          <div className="mt-3 flex flex-col gap-2 w-full">
+                            <span className={`rounded-full px-3 py-1.5 font-bold ${isSenior ? 'text-xs' : 'text-[10px]'} bg-brand-burgundy/10 text-brand-burgundy`}>
+                              {item.compatibility_score}% {t('compatibilityScore')}
+                            </span>
+                            {item.reciprocal && (
+                              <span className={`rounded-full px-3 py-1.5 font-bold ${isSenior ? 'text-xs' : 'text-[10px]'} bg-emerald-50 text-emerald-700`}>
+                                {t('reciprocalMatch')}
                               </span>
-                              {item.reciprocal && (
-                                <span className={`rounded-full px-3 py-1 font-bold ${isSenior ? 'text-xs' : 'text-[10px]'} bg-emerald-50 text-emerald-700`}>
-                                  {t('reciprocalMatch')}
-                                </span>
-                              )}
-                            </div>
+                            )}
                           </div>
                         </div>
-                        <button onClick={() => handleConnect(item.id)} className={`shrink-0 rounded-xl bg-brand-burgundy px-5 py-3 font-bold text-white min-h-[44px] ${isSenior ? 'text-sm' : 'text-xs'}`}>
-                          {t('connect')}
-                        </button>
                       </div>
                       {(item.you_can_learn?.length > 0 || item.they_can_learn?.length > 0) && (
-                        <div className={`mt-3 space-y-1 border-t pt-3 ${isSenior ? 'text-sm' : 'text-[10px]'} border-stone-200 text-stone-500`}>
+                        <div className={`mt-4 space-y-2 border-t pt-4 ${isSenior ? 'text-xs' : 'text-[10px]'} border-stone-200 text-stone-500`}>
                           {item.you_can_learn?.length > 0 && (
                             <p>
                               <span className="font-bold">{t('youCanLearn')}:</span>{' '}
-                              {item.you_can_learn.join(', ')}
+                              {item.you_can_learn.slice(0, 2).join(', ')}
                             </p>
                           )}
                           {item.they_can_learn?.length > 0 && (
                             <p>
                               <span className="font-bold">{t('theyCanLearn')}:</span>{' '}
-                              {item.they_can_learn.join(', ')}
+                              {item.they_can_learn.slice(0, 2).join(', ')}
                             </p>
                           )}
                         </div>
                       )}
+                      <button onClick={() => handleConnect(item.id)} className={`mt-4 w-full rounded-xl bg-brand-burgundy px-5 py-3 font-bold text-white min-h-[44px] hover:opacity-90 transition ${isSenior ? 'text-sm' : 'text-xs'}`}>
+                        {t('connect')}
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -702,13 +713,25 @@ export default function Dashboard({ feed = [], recommendations = [], pointsSumma
         })}
       </nav>
 
+      {/* Avatar Selector Modal */}
+      {isAvatarSelectorOpen && (
+        <AvatarSelector onClose={() => setIsAvatarSelectorOpen(false)} onAvatarChange={(avatar) => { /* refresh happens automatically */ }} />
+      )}
+
+      {/* Public Profile Modal */}
+      {publicProfileUserId && (
+        <PublicProfileModal userId={publicProfileUserId} onClose={() => setPublicProfileUserId(null)} />
+      )}
+
       {/* Profile Modal */}
       {isProfileOpen && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/30 p-0 md:items-center md:justify-center md:p-6" onClick={(e) => { if (e.target === e.currentTarget) setIsProfileOpen(false); }}>
           <div className="w-full rounded-t-3xl p-6 shadow-xl md:max-w-sm md:rounded-3xl bg-white" style={{ paddingBottom: 'max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem))' }}>
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
-                <ProfileAvatar size="h-18 w-18" interactive={false} />
+                <button onClick={() => setIsAvatarSelectorOpen(true)} className="rounded-full hover:opacity-80 transition">
+                  <ProfileAvatar size="h-18 w-18" interactive={false} />
+                </button>
                 <div>
                   <h2 className={`font-bold ${isSenior ? 'text-xl' : 'text-lg'}`}>{displayName}</h2>
                   <p className={`${isSenior ? 'text-base' : 'text-sm'} text-stone-500`}>{appUser?.email}</p>

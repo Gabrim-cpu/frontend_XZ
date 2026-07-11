@@ -8,7 +8,7 @@ export default function BackgroundPattern() {
 
       {/* Left side - wavy line pattern */}
       <svg
-        className="absolute left-0 top-0 w-32 h-full opacity-8 pointer-events-none"
+        className="absolute left-0 top-0 w-32 h-full opacity-20 pointer-events-none"
         viewBox="0 0 100 1000"
         preserveAspectRatio="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -20,7 +20,7 @@ export default function BackgroundPattern() {
               stroke="#740A03"
               strokeWidth="1"
               fill="none"
-              opacity="0.12"
+              opacity="0.15"
             />
           </pattern>
         </defs>
@@ -29,15 +29,15 @@ export default function BackgroundPattern() {
 
       {/* Right side - geometric diamond pattern */}
       <svg
-        className="absolute right-0 top-0 w-40 h-full opacity-8 pointer-events-none"
+        className="absolute right-0 top-0 w-40 h-full opacity-20 pointer-events-none"
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
           <pattern id="diamond-right" patternUnits="userSpaceOnUse" width="50" height="50">
-            <polygon points="25,0 50,25 25,50 0,25" stroke="#740A03" strokeWidth="0.8" fill="none" opacity="0.08" />
-            <polygon points="25,10 40,25 25,40 10,25" stroke="#740A03" strokeWidth="0.8" fill="none" opacity="0.12" />
+            <polygon points="25,0 50,25 25,50 0,25" stroke="#740A03" strokeWidth="0.8" fill="none" opacity="0.1" />
+            <polygon points="25,10 40,25 25,40 10,25" stroke="#740A03" strokeWidth="0.8" fill="none" opacity="0.15" />
           </pattern>
         </defs>
         <rect width="100" height="100" fill="url(#diamond-right)" />

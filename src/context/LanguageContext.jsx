@@ -74,6 +74,7 @@ const translations = {
     publish: 'Publish',
     like: 'Like',
     comment: 'Comment',
+    save: 'Save',
     share: 'Share',
     rate: 'Rate',
     noRecommendations: 'No matching connections found yet.',
@@ -189,6 +190,9 @@ const translations = {
     languageDesc: 'Choose your preferred language',
     darkThemeDesc: 'Easier on the eyes at night',
     saveChanges: 'Save Changes',
+    loading: 'Loading...',
+    close: 'Close',
+    profileNotFound: 'Profile not found',
   },
   fr: {
     // Auth & Register
@@ -259,6 +263,7 @@ const translations = {
     publish: 'Publier',
     like: 'Aimer',
     comment: 'Commenter',
+    save: 'Enregistrer',
     share: 'Partager',
     rate: 'Évaluer',
     noRecommendations: 'Aucune recommandation trouvée.',
@@ -374,6 +379,9 @@ const translations = {
     languageDesc: 'Choisissez votre langue préférée',
     darkThemeDesc: 'Plus doux pour les yeux la nuit',
     saveChanges: 'Enregistrer',
+    loading: 'Chargement...',
+    close: 'Fermer',
+    profileNotFound: 'Profil non trouvé',
   }
 };
 

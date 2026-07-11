@@ -264,8 +264,8 @@ export default function ChatMessaging({ currentUser }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F7F4] md:p-6">
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col bg-white md:min-h-[740px] md:rounded-[2rem] md:border md:border-stone-200 md:shadow-sm">
+    <div className="flex flex-col h-screen bg-[#F8F7F4] md:p-6 md:min-h-screen">
+      <div className="mx-auto flex flex-col h-full w-full max-w-6xl bg-white md:rounded-[2rem] md:border md:border-stone-200 md:shadow-sm">
 
         {/* Chat header */}
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-stone-200 bg-white/95 px-4 py-3 backdrop-blur md:rounded-t-[2rem]" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
@@ -340,7 +340,7 @@ export default function ChatMessaging({ currentUser }) {
           </aside>
 
           {/* Active Chat Conversation page */}
-          <section className={`${activeThreadId ? "flex" : "hidden md:flex"} min-h-[70vh] flex-col md:col-span-8 bg-[#FDFBF9]`}>
+          <section className={`${activeThreadId ? "flex" : "hidden md:flex"} flex-1 flex-col md:col-span-8 bg-[#FDFBF9] overflow-hidden`}>
             {activeThread ? (
               <>
                 <div className="flex items-center justify-between border-b border-stone-200 px-4 py-3 bg-white">
@@ -365,7 +365,7 @@ export default function ChatMessaging({ currentUser }) {
                 </div>
 
                 {/* Messages display */}
-                <div className="flex-1 space-y-4 overflow-y-auto p-4 pb-28 md:pb-4">
+                <div className="flex-1 space-y-4 overflow-y-auto p-3 pb-24 md:p-4 md:pb-4 flex flex-col">
                   {messages.map((message) => {
                     const isMine = message.senderId === currentUser.id;
                     return (
@@ -406,25 +406,25 @@ export default function ChatMessaging({ currentUser }) {
 
                 {/* Live recording preview bar */}
                 {isRecording && (
-                  <div className="bg-red-50 border-t border-red-100 px-6 py-3 flex items-center justify-between gap-4 animate-pulse">
-                    <div className="flex items-center gap-3 text-red-700">
-                      <Volume2 className="h-4 w-4 animate-bounce" />
-                      <span className="text-xs font-semibold">{t('recordVoice')}...</span>
+                  <div className="bg-red-50 border-t border-red-100 px-3 md:px-6 py-2 md:py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 animate-pulse shrink-0">
+                    <div className="flex items-center gap-2 md:gap-3 text-red-700">
+                      <Volume2 className="h-4 w-4 animate-bounce flex-shrink-0" />
+                      <span className="text-xs md:text-sm font-semibold">{t('recordVoice')}...</span>
                     </div>
                     {liveTranscript && (
-                      <p className="text-xs italic text-red-900 truncate max-w-md flex-1">
+                      <p className="text-xs italic text-red-900 truncate flex-1">
                         "{liveTranscript}"
                       </p>
                     )}
-                    <button onClick={stopRecording} className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-full font-bold">
+                    <button onClick={stopRecording} className="text-xs md:text-sm bg-red-600 text-white px-3 py-1.5 rounded-full font-bold whitespace-nowrap flex-shrink-0">
                       {t('stopRecording')}
                     </button>
                   </div>
                 )}
 
                 {/* Chat input controller */}
-                <form onSubmit={handleSubmit} className="fixed bottom-0 left-0 right-0 z-20 border-t border-stone-200 bg-white p-3 md:static md:z-auto" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
-                  <div className="mx-auto flex max-w-6xl items-center gap-2">
+                <form onSubmit={handleSubmit} className="border-t border-stone-200 bg-white p-3 shrink-0 md:p-4" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+                  <div className="flex items-center gap-2 max-w-full">
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -437,10 +437,10 @@ export default function ChatMessaging({ currentUser }) {
                       type="button"
                       disabled={isUploading}
                       onClick={() => fileInputRef.current?.click()}
-                      className="rounded-full p-3 text-stone-500 hover:bg-stone-100 disabled:opacity-40 min-h-[48px] min-w-[48px] flex items-center justify-center"
+                      className="rounded-full p-2.5 md:p-3 text-stone-500 hover:bg-stone-100 disabled:opacity-40 min-h-[40px] md:min-h-[48px] min-w-[40px] md:min-w-[48px] flex items-center justify-center flex-shrink-0"
                       title={t('attachFile')}
                     >
-                      <Paperclip className="h-6 w-6" />
+                      <Paperclip className="h-5 md:h-6 w-5 md:w-6" />
                     </button>
 
                     <input
@@ -448,7 +448,7 @@ export default function ChatMessaging({ currentUser }) {
                       onChange={(event) => setInputText(event.target.value)}
                       placeholder={t('typeMessage')}
                       disabled={isRecording || isUploading}
-                      className="min-w-0 flex-1 rounded-full border border-stone-200 bg-[#FBF9F6] px-4 py-3.5 text-base outline-none focus:border-brand-burgundy disabled:opacity-50 min-h-[48px]"
+                      className="min-w-0 flex-1 rounded-full border border-stone-200 bg-[#FBF9F6] px-3 md:px-4 py-2.5 md:py-3.5 text-sm md:text-base outline-none focus:border-brand-burgundy disabled:opacity-50 min-h-[40px] md:min-h-[48px]"
                     />
 
                     {!inputText.trim() && (
@@ -456,10 +456,10 @@ export default function ChatMessaging({ currentUser }) {
                         type="button"
                         onClick={isRecording ? stopRecording : startRecording}
                         disabled={isUploading}
-                        className={`rounded-full p-3 text-white transition disabled:opacity-50 min-h-[48px] min-w-[48px] flex items-center justify-center ${isRecording ? "bg-red-600" : "bg-stone-900 hover:bg-stone-800"}`}
+                        className={`rounded-full p-2.5 md:p-3 text-white transition disabled:opacity-50 min-h-[40px] md:min-h-[48px] min-w-[40px] md:min-w-[48px] flex items-center justify-center flex-shrink-0 ${isRecording ? "bg-red-600" : "bg-stone-900 hover:bg-stone-800"}`}
                         title={isRecording ? t('stopRecording') : t('recordVoice')}
                       >
-                        {isRecording ? <Square className="h-6 w-6 fill-current" /> : <Mic className="h-6 w-6" />}
+                        {isRecording ? <Square className="h-5 md:h-6 w-5 md:w-6 fill-current" /> : <Mic className="h-5 md:h-6 w-5 md:w-6" />}
                       </button>
                     )}
 
@@ -467,9 +467,9 @@ export default function ChatMessaging({ currentUser }) {
                       <button
                         type="submit"
                         disabled={!inputText.trim() || isUploading}
-                        className="rounded-full bg-brand-burgundy p-3 text-white disabled:opacity-40 hover:bg-opacity-95 min-h-[48px] min-w-[48px] flex items-center justify-center"
+                        className="rounded-full bg-brand-burgundy p-2.5 md:p-3 text-white disabled:opacity-40 hover:bg-opacity-95 min-h-[40px] md:min-h-[48px] min-w-[40px] md:min-w-[48px] flex items-center justify-center flex-shrink-0"
                       >
-                        <Send className="h-6 w-6" />
+                        <Send className="h-5 md:h-6 w-5 md:w-6" />
                       </button>
                     )}
                   </div>
